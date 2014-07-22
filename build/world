@@ -1,0 +1,48 @@
+
+# sophia makefile
+#
+
+buildworld = 1
+
+include build/config
+include $(addsuffix /makefile, $(SOPHIA_LIBS))
+
+O = $(LIBSR_OBJECTS) \
+    $(LIBSV_OBJECTS) \
+    $(LIBSL_OBJECTS) \
+    $(LIBSS_OBJECTS) \
+    $(LIBSM_OBJECTS) \
+    $(LIBSD_OBJECTS) \
+    $(LIBSE_OBJECTS)
+
+all: clean_static clean_dso $(O) static dynamic
+
+.c.o:
+	$(E) cc $(CFLAGS_DEBUG) $(CFLAGS_OPT) $(CFLAGS_STRICT) -c $<
+	$(Q) $(CC) $(CFLAGS) -c $< -o $@
+
+static:
+	$(E) ar $(SOPHIA_OUTPUT)/$(SOPHIA_STATIC)
+	$(Q) $(AR) crus $(SOPHIA_OUTPUT)/$(SOPHIA_STATIC) $(O)
+
+dynamic:
+	$(E) ld $(SOPHIA_OUTPUT)/$(SOPHIA_DSO)
+	$(Q) $(LD) $(O) $(LDFLAGS) -o $(SOPHIA_OUTPUT)/$(SOPHIA_DSOLIB)
+	$(Q) $(LN) -s $(SOPHIA_DSOLIB) $(SOPHIA_OUTPUT)/$(SOPHIA_DSO).$(SOPHIA_VMAJOR)
+	$(Q) $(LN) -s $(SOPHIA_DSOLIB) $(SOPHIA_OUTPUT)/$(SOPHIA_DSO)
+	$(Q) $(STRIP) --strip-unneeded $(SOPHIA_OUTPUT)/$(SOPHIA_DSOLIB)
+
+clean: clean_o clean_static clean_dso
+
+clean_o:
+	$(Q) $(RM) -f $(O)
+
+clean_static:
+	$(Q) $(RM) -f $(SOPHIA_OUTPUT)/$(SOPHIA_STATIC)
+
+clean_dso:
+	$(Q) $(RM) -f $(SOPHIA_OUTPUT)/$(SOPHIA_DSOLIB)
+	$(Q) $(RM) -f $(SOPHIA_OUTPUT)/$(SOPHIA_DSO).$(SOPHIA_VMAJOR)
+	$(Q) $(RM) -f $(SOPHIA_OUTPUT)/$(SOPHIA_DSO)
+
+# vim: syntax=make
