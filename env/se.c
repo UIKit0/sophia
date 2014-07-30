@@ -334,13 +334,11 @@ static int
 se_cmpset(seobj *o, va_list args)
 {
 	secmp *c = (secmp*)o;
-	if (srunlikely(se_active(c->e)))
-		return -1;
+	char *name = va_arg(args, char*);
+	srcmpf cmp = va_arg(args, srcmpf);
+	void *cmparg = va_arg(args, void*);
 	return sr_cmpindex_add(&c->e->ci, &c->e->a,
-	                       SR_CMPCUSTOM,
-	                       va_arg(args, char*),
-	                       va_arg(args, srcmpf),
-	                       va_arg(args, void*));
+	                       SR_CMPCUSTOM, name, cmp, cmparg);
 }
 
 static seobjif secmpif =

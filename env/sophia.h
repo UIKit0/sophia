@@ -40,6 +40,7 @@ SP_API size_t  sp_keysize(void*, ...);
 SP_API void   *sp_value(void*, ...);
 SP_API size_t  sp_valuesize(void*, ...);
 SP_API void   *sp_backup(void*, ...);
+SP_API char   *sp_error(void *);
 
 #ifdef __cplusplus
 }
