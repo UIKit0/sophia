@@ -15,22 +15,22 @@ O = $(LIBSR_OBJECTS) \
     $(LIBSD_OBJECTS) \
     $(LIBSE_OBJECTS)
 
-all: clean_static clean_dso $(O) static dynamic
+all: static dynamic
+
+static: $(O)
+	$(E) ar $(SOPHIA_OUTPUT)/$(SOPHIA_STATIC)
+	$(Q) $(AR) crus $(SOPHIA_OUTPUT)/$(SOPHIA_STATIC) $(O)
+
+dynamic: $(O)
+	$(E) ld $(SOPHIA_OUTPUT)/$(SOPHIA_DSO)
+	$(Q) $(LD) $(O) $(LDFLAGS) -o $(SOPHIA_OUTPUT)/$(SOPHIA_DSOLIB)
+	$(Q) $(LN) -fs $(SOPHIA_DSOLIB) $(SOPHIA_OUTPUT)/$(SOPHIA_DSO).$(SOPHIA_VMAJOR)
+	$(Q) $(LN) -fs $(SOPHIA_DSOLIB) $(SOPHIA_OUTPUT)/$(SOPHIA_DSO)
+	$(Q) $(STRIP) --strip-unneeded $(SOPHIA_OUTPUT)/$(SOPHIA_DSOLIB)
 
 .c.o:
 	$(E) cc $(CFLAGS_DEBUG) $(CFLAGS_OPT) $(CFLAGS_STRICT) -c $<
 	$(Q) $(CC) $(CFLAGS) -c $< -o $@
-
-static:
-	$(E) ar $(SOPHIA_OUTPUT)/$(SOPHIA_STATIC)
-	$(Q) $(AR) crus $(SOPHIA_OUTPUT)/$(SOPHIA_STATIC) $(O)
-
-dynamic:
-	$(E) ld $(SOPHIA_OUTPUT)/$(SOPHIA_DSO)
-	$(Q) $(LD) $(O) $(LDFLAGS) -o $(SOPHIA_OUTPUT)/$(SOPHIA_DSOLIB)
-	$(Q) $(LN) -s $(SOPHIA_DSOLIB) $(SOPHIA_OUTPUT)/$(SOPHIA_DSO).$(SOPHIA_VMAJOR)
-	$(Q) $(LN) -s $(SOPHIA_DSOLIB) $(SOPHIA_OUTPUT)/$(SOPHIA_DSO)
-	$(Q) $(STRIP) --strip-unneeded $(SOPHIA_OUTPUT)/$(SOPHIA_DSOLIB)
 
 clean: clean_o clean_static clean_dso
 
