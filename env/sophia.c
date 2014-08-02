@@ -223,3 +223,10 @@ sp_backup(void *o, ...)
 		return NULL;
 	return oif->backup(o);
 }
+
+SP_API char*
+sp_error(void *o, ...)
+{
+	(void)o;
+	return "";
+}

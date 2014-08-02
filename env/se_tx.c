@@ -236,7 +236,7 @@ int se_txssset_logless(sedb *db, uint8_t flags, va_list args)
 		l.value     = NULL;
 		l.valuesize = 0;
 	}
-	l.lsn = va_arg(args, uint64_t);
+	l.lsn = sr_seq(&db->e->seq, SR_LSNNEXT);
 
 	sv v;
 	svinit(&v, &sv_localif, &l, NULL);

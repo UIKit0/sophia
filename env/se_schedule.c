@@ -157,6 +157,10 @@ se_schedule_db(seplan *p, sedb *db, ssdblist *gcl, int snapshot)
 {
 	se *e = p->e;
 	sd_indexlock(&db->db.primary);
+	if (! sd_indexisinit(&db->db.primary)) {
+		sd_indexunlock(&db->db.primary);
+		return 0;
+	}
 	sdnodeindex index;
 	int rc = sd_nodeindex_clone(&db->db.primary.i, &e->a, &index);
 	sd_indexunlock(&db->db.primary);
