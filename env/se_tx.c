@@ -221,8 +221,72 @@ se_txssrollback(sedb *db, svlog *log)
 	sv_logfree(log, db->c.a);
 }
 
+int se_txssset_logless(sedb *db, uint8_t flags, va_list args)
+{
+	svlocal l;
+	l.flags       = flags;
+	l.key         = va_arg(args, void*);
+	l.keysize     = va_arg(args, size_t);
+	l.valueoffset = 0;
+	if (flags & SVSET) {
+		l.value     = va_arg(args, void*);
+		l.valuesize = va_arg(args, size_t);
+	} else {
+		assert((flags & SVDELETE) > 0);
+		l.value     = NULL;
+		l.valuesize = 0;
+	}
+	l.lsn = va_arg(args, uint64_t);
+
+	sv v;
+	svinit(&v, &sv_localif, &l, NULL);
+	svlog log;
+	sv_loginit(&log);
+
+	sm_lock(&db->mvcc);
+	smstate s = sm_setss(&db->mvcc, &v, &log);
+	if (s == SMWAIT) {
+		sm_unlock(&db->mvcc);
+		return 2;
+	}
+	if (s == SMROLLBACK) {
+		sm_unlock(&db->mvcc);
+		return 1;
+	}
+
+	uint64_t lsvn = sm_lsvn(&db->mvcc);
+	sdtx td;
+	sd_begin(&db->db, &td, lsvn, &log, NULL);
+	int rc = sd_write(&td);
+	if (srunlikely(rc == -1)) {
+		/*
+		sd_rollback(&td);
+		sd_end(&td);
+		*/
+		sm_unlock(&db->mvcc);
+		se_txssrollback(db, &log);
+		return -1;
+	}
+
+	sd_commit(&td);
+
+	sm_unlock(&db->mvcc);
+	sd_end(&td);
+	sv_logfree(&log, db->c.a);
+
+	if (srlikely(db->e->conf.scheduler == 2)) {
+		seplan plan;
+		se_planinit(&plan, db->e, SE_ALL);
+		rc = se_schedule(&plan);
+	}
+	return rc;
+}
+
 int se_txssset(sedb *db, uint8_t flags, va_list args)
 {
+	if (db->e->conf.logdir == NULL)
+		return se_txssset_logless(db, flags, args);
+
 	svlocal l;
 	l.lsn         = 0,
 	l.flags       = flags;
