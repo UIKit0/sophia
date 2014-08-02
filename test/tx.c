@@ -7,6 +7,7 @@
  * BSD License
 */
 
+#include <libsr.h>
 #include <sophia.h>
 #include "test.h"
 
@@ -18,22 +19,20 @@ test_rollback(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
-	void *db = sp_use(env, "test");
 	void *tx = sp_begin(db);
 	t( tx != NULL );
 	rc = sp_rollback(tx);
@@ -49,22 +48,20 @@ test_commit(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
-	void *db = sp_use(env, "test");
 	void *tx = sp_begin(db);
 	t( tx != NULL );
 	rc = sp_commit(tx);
@@ -80,22 +77,20 @@ test_set_commit(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
-	void *db = sp_use(env, "test");
 	void *tx = sp_begin(db);
 	t( tx != NULL );
 	int key = 7;
@@ -113,22 +108,20 @@ test_set_get_commit(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
-	void *db = sp_use(env, "test");
 	void *tx = sp_begin(db);
 	t( tx != NULL );
 	int key = 7;
@@ -151,22 +144,20 @@ test_set_commit_get0(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
-	void *db = sp_use(env, "test");
 	void *tx = sp_begin(db);
 	t( tx != NULL );
 	int key = 7;
@@ -193,22 +184,20 @@ test_set_commit_get1(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
-	void *db = sp_use(env, "test");
 	void *tx = sp_begin(db);
 	t( tx != NULL );
 	
@@ -243,22 +232,20 @@ test_set_rollback(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
-	void *db = sp_use(env, "test");
 	void *tx = sp_begin(db);
 	t( tx != NULL );
 	int key = 7;
@@ -276,22 +263,20 @@ test_set_rollback_get0(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
-	void *db = sp_use(env, "test");
 	void *tx = sp_begin(db);
 	t( tx != NULL );
 	int key = 7;
@@ -315,22 +300,20 @@ test_set_rollback_get1(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
-	void *db = sp_use(env, "test");
 	void *tx = sp_begin(db);
 	t( tx != NULL );
 	int key = 0;
@@ -361,22 +344,20 @@ test_set_set_commit(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
-	void *db = sp_use(env, "test");
 	void *tx = sp_begin(db);
 	t( tx != NULL );
 	int key = 7;
@@ -397,22 +378,20 @@ test_set_set_get_commit(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
-	void *db = sp_use(env, "test");
 	void *tx = sp_begin(db);
 	t( tx != NULL );
 	int key = 7;
@@ -438,22 +417,20 @@ test_set_set_commit_get(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
-	void *db = sp_use(env, "test");
 	void *tx = sp_begin(db);
 	t( tx != NULL );
 	int key = 7;
@@ -482,22 +459,20 @@ test_set_set_rollback_get(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
-	void *db = sp_use(env, "test");
 	void *tx = sp_begin(db);
 	t( tx != NULL );
 	int key = 7;
@@ -525,22 +500,20 @@ test_set_delete_get_commit(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
-	void *db = sp_use(env, "test");
 	void *tx = sp_begin(db);
 	t( tx != NULL );
 	int key = 7;
@@ -563,22 +536,20 @@ test_set_delete_get_commit_get(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
-	void *db = sp_use(env, "test");
 	void *tx = sp_begin(db);
 	t( tx != NULL );
 	int key = 7;
@@ -602,22 +573,20 @@ test_set_delete_set_commit_get(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
-	void *db = sp_use(env, "test");
 	void *tx = sp_begin(db);
 	t( tx != NULL );
 	int key = 7;
@@ -648,22 +617,20 @@ test_set_delete_commit_get_set(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
-	void *db = sp_use(env, "test");
 	void *tx = sp_begin(db);
 	t( tx != NULL );
 	int key = 7;
@@ -690,22 +657,19 @@ test_p_set_commit(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *a = sp_begin(db);
 	t( a != NULL );
@@ -732,22 +696,19 @@ test_p_set_get_commit(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *a = sp_begin(db);
 	t( a != NULL );
@@ -786,22 +747,19 @@ test_p_set_commit_get0(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *a = sp_begin(db);
 	t( a != NULL );
@@ -841,22 +799,19 @@ test_p_set_commit_get1(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *b = sp_begin(db);
 	t( b != NULL );
@@ -897,22 +852,19 @@ test_p_set_commit_get2(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *a = sp_begin(db);
 	t( a != NULL );
@@ -953,22 +905,19 @@ test_p_set_rollback_get0(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *a = sp_begin(db);
 	t( a != NULL );
@@ -1004,22 +953,19 @@ test_p_set_rollback_get1(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *b = sp_begin(db);
 	t( b != NULL );
@@ -1055,22 +1001,19 @@ test_p_set_rollback_get2(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *a = sp_begin(db);
 	t( a != NULL );
@@ -1106,23 +1049,19 @@ test_c_set_commit0(void)
 	rmrf("./log");
 
 	void *env = sp_env();
-	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *a = sp_begin(db);
 	t( a != NULL );
@@ -1149,22 +1088,19 @@ test_c_set_commit1(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *b = sp_begin(db);
 	t( b != NULL );
@@ -1191,22 +1127,19 @@ test_c_set_commit2(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
-	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
 
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *b = sp_begin(db);
 	t( b != NULL );
@@ -1231,22 +1164,19 @@ test_c_set_commit_rollback_a0(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *b = sp_begin(db);
 	t( b != NULL );
@@ -1271,22 +1201,19 @@ test_c_set_commit_rollback_a1(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *b = sp_begin(db);
 	t( b != NULL );
@@ -1311,22 +1238,19 @@ test_c_set_commit_rollback_b0(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *b = sp_begin(db);
 	t( b != NULL );
@@ -1351,22 +1275,19 @@ test_c_set_commit_rollback_b1(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *b = sp_begin(db);
 	t( b != NULL );
@@ -1391,22 +1312,19 @@ test_c_set_commit_rollback_ab0(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *b = sp_begin(db);
 	t( b != NULL );
@@ -1431,22 +1349,19 @@ test_c_set_commit_rollback_ab1(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *b = sp_begin(db);
 	t( b != NULL );
@@ -1471,22 +1386,19 @@ test_c_set_commit_wait_a0(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *a = sp_begin(db);
 	t( a != NULL );
@@ -1513,22 +1425,19 @@ test_c_set_commit_wait_a1(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *b = sp_begin(db);
 	t( b != NULL );
@@ -1555,22 +1464,19 @@ test_c_set_commit_wait_b0(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *a = sp_begin(db);
 	t( a != NULL );
@@ -1597,22 +1503,19 @@ test_c_set_commit_wait_b1(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *b = sp_begin(db);
 	t( b != NULL );
@@ -1639,22 +1542,19 @@ test_c_set_commit_wait_rollback_a0(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *a = sp_begin(db);
 	t( a != NULL );
@@ -1681,22 +1581,19 @@ test_c_set_commit_wait_rollback_a1(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *b = sp_begin(db);
 	t( b != NULL );
@@ -1723,22 +1620,19 @@ test_c_set_commit_wait_rollback_b0(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *a = sp_begin(db);
 	t( a != NULL );
@@ -1765,22 +1659,19 @@ test_c_set_commit_wait_rollback_b1(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *b = sp_begin(db);
 	t( b != NULL );
@@ -1807,22 +1698,19 @@ test_c_set_commit_wait_n0(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *conf = sp_use(env, "conf");
+	void *conf = sp_ctl(env, "conf");
+	t( sp_set(conf, "env.logdir", "log") == 0 );
 	t( sp_set(conf, "env.dir", "test") == 0 );
 	t( sp_set(conf, "env.threads", 0) == 0 );
 	t( sp_set(conf, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	conf = sp_ctl(db, "conf");
+	t( sp_set(conf, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *a = sp_begin(db);
 	t( a != NULL );
@@ -1859,22 +1747,19 @@ test_c_set_commit_wait_n1(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *conf = sp_use(env, "conf");
+	void *conf = sp_ctl(env, "conf");
+	t( sp_set(conf, "env.logdir", "log") == 0 );
 	t( sp_set(conf, "env.dir", "test") == 0 );
 	t( sp_set(conf, "env.threads", 0) == 0 );
 	t( sp_set(conf, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	conf = sp_ctl(db, "conf");
+	t( sp_set(conf, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *a = sp_begin(db);
 	t( a != NULL );
@@ -1911,22 +1796,19 @@ test_c_set_commit_wait_rollback_n0(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *conf = sp_use(env, "conf");
+	void *conf = sp_ctl(env, "conf");
+	t( sp_set(conf, "env.logdir", "log") == 0 );
 	t( sp_set(conf, "env.dir", "test") == 0 );
 	t( sp_set(conf, "env.threads", 0) == 0 );
 	t( sp_set(conf, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	conf = sp_ctl(db, "conf");
+	t( sp_set(conf, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *a = sp_begin(db);
 	t( a != NULL );
@@ -1965,22 +1847,19 @@ test_c_set_commit_wait_rollback_n1(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *conf = sp_use(env, "conf");
+	void *conf = sp_ctl(env, "conf");
+	t( sp_set(conf, "env.logdir", "log") == 0 );
 	t( sp_set(conf, "env.dir", "test") == 0 );
 	t( sp_set(conf, "env.threads", 0) == 0 );
 	t( sp_set(conf, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	conf = sp_ctl(db, "conf");
+	t( sp_set(conf, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *a = sp_begin(db);
 	t( a != NULL );
@@ -2019,22 +1898,19 @@ test_c_set_commit_wait_rollback_n2(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *conf = sp_use(env, "conf");
+	void *conf = sp_ctl(env, "conf");
+	t( sp_set(conf, "env.logdir", "log") == 0 );
 	t( sp_set(conf, "env.dir", "test") == 0 );
 	t( sp_set(conf, "env.threads", 0) == 0 );
 	t( sp_set(conf, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	conf = sp_ctl(db, "conf");
+	t( sp_set(conf, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *a = sp_begin(db);
 	t( a != NULL );
@@ -2073,22 +1949,19 @@ test_c_set_commit_wait_rollback_n3(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *conf = sp_use(env, "conf");
+	void *conf = sp_ctl(env, "conf");
+	t( sp_set(conf, "env.logdir", "log") == 0 );
 	t( sp_set(conf, "env.dir", "test") == 0 );
 	t( sp_set(conf, "env.threads", 0) == 0 );
 	t( sp_set(conf, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	conf = sp_ctl(db, "conf");
+	t( sp_set(conf, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *a = sp_begin(db);
 	t( a != NULL );
@@ -2125,22 +1998,19 @@ test_c_set_commit_wait_rollback_n4(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *conf = sp_use(env, "conf");
+	void *conf = sp_ctl(env, "conf");
+	t( sp_set(conf, "env.logdir", "log") == 0 );
 	t( sp_set(conf, "env.dir", "test") == 0 );
 	t( sp_set(conf, "env.threads", 0) == 0 );
 	t( sp_set(conf, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	conf = sp_ctl(db, "conf");
+	t( sp_set(conf, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *a = sp_begin(db);
 	t( a != NULL );
@@ -2177,22 +2047,19 @@ test_c_set_get0(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *a = sp_begin(db);
 	t( a != NULL );
@@ -2229,22 +2096,19 @@ test_c_set_get1(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *a = sp_begin(db);
 	t( a != NULL );
@@ -2282,22 +2146,19 @@ test_c_set_get2(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *conf = sp_use(env, "conf");
+	void *conf = sp_ctl(env, "conf");
+	t( sp_set(conf, "env.logdir", "log") == 0 );
 	t( sp_set(conf, "env.dir", "test") == 0 );
 	t( sp_set(conf, "env.threads", 0) == 0 );
 	t( sp_set(conf, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	conf = sp_ctl(db, "conf");
+	t( sp_set(conf, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *z = sp_begin(db);
 
@@ -2369,22 +2230,19 @@ test_c_set_get3(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *conf = sp_use(env, "conf");
+	void *conf = sp_ctl(env, "conf");
+	t( sp_set(conf, "env.logdir", "log") == 0 );
 	t( sp_set(conf, "env.dir", "test") == 0 );
 	t( sp_set(conf, "env.threads", 0) == 0 );
 	t( sp_set(conf, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
+	t( db != NULL );
+	conf = sp_ctl(db, "conf");
+	t( sp_set(conf, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	void *z = sp_begin(db);
 
@@ -2541,22 +2399,20 @@ test_s_set(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
-	void *db = sp_use(env, "test");
 	int key = 7;
 	t( sp_set(db, &key, sizeof(key), &key, sizeof(key)) == 0 );
 	t( sp_destroy(env) == 0 );
@@ -2570,22 +2426,20 @@ test_s_set_get(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
-	void *db = sp_use(env, "test");
 	int key = 7;
 	t( sp_set(db, &key, sizeof(key), &key, sizeof(key)) == 0 );
 
@@ -2606,22 +2460,20 @@ test_sc_set_wait(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
+	void *db = sp_database(env);
+	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
-	void *db = sp_use(env, "test");
 	int key = 7;
 	void *tx = sp_begin(db);
 	t( tx != NULL );
@@ -2646,23 +2498,19 @@ test_sc_get(void)
 
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.logdir", "log") == 0 );
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
 	int rc = sp_open(env);
 	t( rc == 0 );
 	
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-	void *stx = sp_begin(scheme);
-	t( sp_set(stx, "test") == 0);
-	t( sp_set(stx, "test.cmp", "u32") == 0 );
-	t( sp_commit(stx) == 0 );
-	t( sp_destroy(scheme) == 0 );
-
-	void *db = sp_use(env, "test");
+	void *db = sp_database(env);
 	t( db != NULL );
+	c = sp_ctl(db, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_open(db) == 0 );
 
 	int key = 7;
 	int v = 7;
@@ -2703,6 +2551,7 @@ main(int argc, char *argv[])
 	test( test_set_rollback );
 	test( test_set_rollback_get0 );
 	test( test_set_rollback_get1 );
+
 	test( test_set_set_commit );
 	test( test_set_set_get_commit );
 	test( test_set_set_commit_get );

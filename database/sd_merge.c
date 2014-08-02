@@ -117,7 +117,7 @@ int sd_merge(sd *db, sdnode *node, ssc *sc, uint64_t lsvn)
 	sriter i;
 	sr_iterinit(&i, &sm_indexiterraw, db->c);
 	sr_iteropen(&i, merge.index);
-	ss_mergeinit(&merge.m, db->store, db->c, sc, db->id,
+	ss_mergeinit(&merge.m, db->store, db->c, sc, db->scheme->dsn,
 	             &node->index,
 	             &i, merge.index->keymax, lsvn);
 	int rc = ss_merge(&merge.m);

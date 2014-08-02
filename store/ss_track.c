@@ -58,7 +58,7 @@ ss_trackcmp(const void *a, const void *b, void *c)
 	register ssref *bp = *(ssref**)b;
 	register sstrack *t = c;
 	register int rc =
-		sr_compare(t->c->sdb->cmp,
+		sr_compare(&t->c->sdb->cmp,
 		           ss_refmin(ap), ap->sizemin,
 		           ss_refmin(bp), bp->sizemin);
 	assert(rc != 0);

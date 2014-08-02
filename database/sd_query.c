@@ -50,7 +50,7 @@ static void
 sd_min(sdquery *q, smv *a, sv *b)
 {
 	if (a && b) {
-		int rc = sr_compare(q->db->c->sdb->cmp, a->key, a->keysize,
+		int rc = sr_compare(&q->db->c->sdb->cmp, a->key, a->keysize,
 		                    svkey(b), svkeysize(b));
 		switch (rc) {
 		case -1:
@@ -74,7 +74,7 @@ static void
 sd_max(sdquery *q, smv *a, sv *b)
 {
 	if (a && b) {
-		int rc = sr_compare(q->db->c->sdb->cmp, a->key, a->keysize,
+		int rc = sr_compare(&q->db->c->sdb->cmp, a->key, a->keysize,
 		                    svkey(b), svkeysize(b));
 		switch (rc) {
 		case  1:

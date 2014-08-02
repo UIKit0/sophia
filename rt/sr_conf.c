@@ -11,11 +11,10 @@
 
 int sr_confinit(srconf *c, sra *a)
 {
+	(void)a;
 	c->a              = sr_allocstd;
 	c->aarg           = NULL;
-	c->logdir         = sr_strdup(a, "log");
-	if (srunlikely(c->logdir == NULL))
-		return -1;
+	c->logdir         = NULL;
 	c->logdir_read    = 1;
 	c->logdir_write   = 1;
 	c->logdir_create  = 1;
@@ -152,8 +151,6 @@ int sr_confset(srconf *c, sra *a, char *path, va_list args)
 int sr_confvalidate(srconf *c)
 {
 	if (srunlikely(c->dir == NULL))
-		return -1;
-	if (srunlikely(c->logdir == NULL))
 		return -1;
 	return 0;
 }

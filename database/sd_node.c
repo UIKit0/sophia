@@ -39,7 +39,7 @@ int sd_nodefree(sdnode *n)
 
 int sd_nodecmp(sdnode *n, void *key, int keysize)
 {
-	srcomparator *cmp = n->c->sdb->cmp;
+	srcomparator *cmp = &n->c->sdb->cmp;
 	sd_nodelock(n);
 	ssref *min = ss_indexmin(&n->index);
 	ssref *max = ss_indexmax(&n->index);

@@ -37,7 +37,7 @@ se_cursorseek(secursor *c, void *key, int keysize)
 
 	sv *v = NULL;
 	if (a && rc > 0) {
-		rc = svcompare(a, &q.result, c->db->c.sdb->cmp);
+		rc = svcompare(a, &q.result, &c->db->c.sdb->cmp);
 		switch (c->order) {
 		case SR_LT:
 		case SR_LTE: 
@@ -172,7 +172,7 @@ se_cursorvaluesize(seobj *o)
 static seobjif secursorif =
 {
 	.ctl       = NULL,
-	.use       = NULL,
+	.database  = NULL,
 	.open      = NULL,
 	.destroy   = se_cursordestroy, 
 	.set       = NULL,

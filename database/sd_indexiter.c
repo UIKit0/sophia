@@ -82,7 +82,7 @@ sd_indexiter_route(sdindexiter *i, int *match)
 		return i->index->n - 1;
 	n = sd_nodeindexv(i->index, min);
 	ssref *minp = ss_indexmin(&n->index);
-	srcomparator *cmp = n->c->sdb->cmp;
+	srcomparator *cmp = &n->c->sdb->cmp;
 	int l = sr_compare(cmp, ss_refmin(minp), minp->sizemin,
 	                   i->key, i->keysize);
 	if (l == 1)
@@ -147,7 +147,7 @@ sd_indexiter_open(sriter *i, va_list args)
 		sdnode *n = sd_nodeindexv(ii->index, ii->pos);
 		if (srunlikely(n->index.n > 0)) {
 			ssref *p = ss_indexmin(&n->index);
-			int l = sr_compare(i->c->sdb->cmp, ss_refmin(p),
+			int l = sr_compare(&i->c->sdb->cmp, ss_refmin(p),
 			                   p->sizemin,
 			                   ii->key, ii->keysize);
 			if (srunlikely(l == 0))
@@ -162,7 +162,7 @@ sd_indexiter_open(sriter *i, va_list args)
 		sdnode *n = sd_nodeindexv(ii->index, ii->pos);
 		if (srunlikely(n->index.n > 0)) {
 			ssref *p = ss_indexmax(&n->index);
-			int r = sr_compare(i->c->sdb->cmp, ss_refmax(p),
+			int r = sr_compare(&i->c->sdb->cmp, ss_refmax(p),
 			                   p->sizemax,
 			                   ii->key, ii->keysize);
 			if (srunlikely(r == 0))

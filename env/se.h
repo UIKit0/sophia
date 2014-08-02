@@ -11,7 +11,6 @@
 
 typedef struct sectl sectl;
 typedef struct seconf seconf;
-typedef struct secmp secmp;
 typedef struct se se;
 
 struct sectl {
@@ -24,14 +23,8 @@ struct seconf {
 	se *e;
 };
 
-struct secmp {
-	seobj o;
-	se *e;
-};
-
 typedef enum {
 	SE_OFFLINE,
-	SE_DEPLOY,
 	SE_ONLINE,
 	SE_RECOVER,
 	SE_SHUTDOWN
@@ -43,7 +36,6 @@ struct se {
 	sra a;
 	sre e;
 	srseq seq;
-	srcmpindex ci;
 	slpool lp;
 	ss store;
 	setaskmgr tm;
@@ -51,12 +43,9 @@ struct se {
 	seprocess stub;
 	srflags schedflags;
 	int schedsnap;
-	smdbindex dbvi;
 	src c;
 	srconf conf;
 	seconf objconf;
-	secmp  objcmp;
-	seobj *objscheme;
 	sectl  objctl;
 	seobjindex oi;
 };

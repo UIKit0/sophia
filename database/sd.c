@@ -16,7 +16,6 @@
 
 int sd_new(sd *db, srscheme *scheme, ss *s, src *c)
 {
-	db->id     = scheme->dsn;
 	db->store  = s;
 	db->scheme = scheme;
 	db->c      = c;
@@ -106,7 +105,7 @@ int sd_recover(sd *db, sstrack *s)
 int sd_drop(sd *db, ssc *sc)
 {
 	ss_creset(sc);
-	int rc = ss_drop(db->store, &sc->build, db->id);
+	int rc = ss_drop(db->store, &sc->build, db->scheme->dsn);
 	if (srunlikely(rc == -1))
 		return -1;
 	sd_indexdrop(&db->primary, db->store);
@@ -115,7 +114,7 @@ int sd_drop(sd *db, ssc *sc)
 
 int sd_snapshot(sd *db, ssc *sc)
 {
-	int rc = ss_snapshotdb(&sc->build, db->id);
+	int rc = ss_snapshotdb(&sc->build, db->scheme->dsn);
 	if (srunlikely(rc == -1))
 		return -1;
 	return sd_indexsnapshot(&db->primary, sc);

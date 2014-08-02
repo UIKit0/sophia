@@ -64,30 +64,25 @@ se_open(seobj *o, va_list args)
 	sr_cinit(&e->c, &e->conf, NULL, &e->seq, &e->a);
 	se_taskmgr_init(&e->tm);
 	se_processstub_init(&e->stub, &e->c, e);
-	sl_poolinit(&e->lp, &e->c);
-	rc = sl_poolopen(&e->lp);
-	if (srunlikely(rc == -1))
-		return -1;
+	if (e->conf.logdir) {
+		sl_poolinit(&e->lp, &e->c);
+		rc = sl_poolopen(&e->lp);
+		if (srunlikely(rc == -1))
+			return -1;
+	}
 	rc = ss_open(&e->store, &e->c);
 	if (srunlikely(rc == -1))
 		return -1;
 	int create = rc;
-	if (create) {
-		e->mode = SE_DEPLOY;
-		rc = sl_poolrotate(&e->lp);
-		if (srunlikely(rc == -1))
-			return -1;
-		e->objscheme = se_schemenew(e);
-		if (srunlikely(e->objscheme == NULL))
-			return -1;
-	} else {
+	if (create == 0) {
 		e->mode = SE_RECOVER;
-		e->objscheme = se_schemeprepare(e);
-		if (srunlikely(e->objscheme == NULL))
-			return -1;
 		rc = se_recover(e);
 		if (srunlikely(rc == -1))
 			return -1;
+	} else {
+		sr_seq(&e->seq, SR_LSNNEXT);
+	}
+	if (e->conf.logdir) {
 		rc = sl_poolrotate(&e->lp);
 		if (srunlikely(rc == -1))
 			return -1;
@@ -133,10 +128,7 @@ se_destroy(seobj *o)
 
 	se_destroylist(&e->oi.backuplist);
 	se_destroylist(&e->oi.cursorlist);
-	se_destroylist(&e->oi.txschemelist);
 	se_destroylist(&e->oi.txlist);
-	if (e->objscheme)
-		sp_destroy(e->objscheme);
 	se_destroylist(&e->oi.dblist);
 	se_objindex_free(&e->oi);
 
@@ -144,13 +136,14 @@ se_destroy(seobj *o)
 	rc = ss_close(&e->store, &e->c);
 	if (srunlikely(rc == -1))
 		rcret = -1;
-	rc = sl_poolshutdown(&e->lp);
-	if (srunlikely(rc == -1))
-		rcret = -1;
+	if (e->conf.logdir) {
+		rc = sl_poolshutdown(&e->lp);
+		if (srunlikely(rc == -1))
+			rcret = -1;
+	}
 	se_taskmgr_free(&e->tm, &e->c);
 	sr_flagsfree(&e->schedflags);
 	sr_seqfree(&e->seq);
-	sr_cmpindex_free(&e->ci, &e->a);
 	sr_efree(&e->e);
 	sra std;
 	sr_allocinit(&std, sr_allocstd, NULL);
@@ -160,31 +153,24 @@ se_destroy(seobj *o)
 }
 
 static void*
-se_use(seobj *o, char *name)
+se_database(seobj *o, va_list args)
 {
+	(void)args;
 	se *e = (se*)o;
-	if (srunlikely(strcmp(name, "conf") == 0))
-		return &e->objconf.o;
-	else
-	if (srunlikely(strcmp(name, "cmp") == 0))
-		return &e->objcmp.o;
-	else
-	if (srunlikely(strcmp(name, "scheme") == 0))
-		return e->objscheme;
-
-	uint64_t lsvn = sr_seq(&e->seq, SR_LSN) - 1;
-	smdb *dbv = sm_dbindex_use(&e->dbvi, name, lsvn);
-	if (srunlikely(dbv == NULL))
-		return NULL;
-	sedb *db = dbv->ptr;
-	return &db->o;
+	uint32_t dsn = sr_seq(&e->seq, SR_DSNNEXT);
+	return se_dbnew(e, dsn);
 }
 
 static void*
-se_ctl(seobj *o)
+se_ctl(seobj *o, va_list args)
 {
 	se *e = (se*)o;
-	return &e->objctl;
+	char *name = va_arg(args, char*);
+	if (srlikely(strcmp(name, "ctl") == 0))
+		return &e->objctl;
+	if (srunlikely(strcmp(name, "conf") == 0))
+		return &e->objconf.o;
+	return NULL;
 }
 
 static void*
@@ -197,7 +183,7 @@ se_backup(seobj *o)
 static seobjif seif =
 {
 	.ctl       = se_ctl,
-	.use       = se_use,
+	.database  = se_database,
 	.open      = se_open,
 	.destroy   = se_destroy,
 	.set       = NULL,
@@ -217,7 +203,6 @@ static seobjif seif =
 
 static seobjif sectlif;
 static seobjif seconfif;
-static seobjif secmpif;
 
 seobj *se_new(void)
 {
@@ -231,26 +216,17 @@ seobj *se_new(void)
 	sr_seqinit(&e->seq);
 	se_objindex_init(&e->oi);
 	sr_allocinit(&e->a, sr_allocstd, NULL);
-	int rc = sr_cmpindex_init(&e->ci, &e->a);
-	if (srunlikely(rc == -1)) {
-		sr_free(&e->a, e);
-		return NULL;
-	}
-	ss_init(&e->store);
-	rc = sr_confinit(&e->conf, &e->a);
-	if (srunlikely(rc == -1)) {
-		sr_cmpindex_free(&e->ci, &e->a);
-		sr_free(&e->a, e);
-		return NULL;
-	}
-	sm_dbindex_init(&e->dbvi);
-	se_objinit(&e->objconf.o, SEOCONF, &seconfif);
-	se_objinit(&e->objcmp.o, SEOCMP, &secmpif);
-	sr_flagsinit(&e->schedflags, 0);
-	e->objconf.e = e;
-	e->objcmp.e  = e;
-	e->objscheme = NULL;
+	sr_cinit(&e->c, &e->conf, NULL, &e->seq, &e->a);
 
+	ss_init(&e->store);
+	int rc = sr_confinit(&e->conf, &e->a);
+	if (srunlikely(rc == -1)) {
+		sr_free(&e->a, e);
+		return NULL;
+	}
+	sr_flagsinit(&e->schedflags, 0);
+	se_objinit(&e->objconf.o, SEOCONF, &seconfif);
+	e->objconf.e = e;
 	se_objinit(&e->objctl.o, SEOCTL, &sectlif);
 	e->objctl.e = e;
 	return &e->o;
@@ -291,7 +267,7 @@ se_confset(seobj *o, va_list args)
 static seobjif sectlif =
 {
 	.ctl       = NULL,
-	.use       = NULL,
+	.database  = NULL,
 	.open      = NULL,
 	.destroy   = NULL,
 	.set       = se_ctlset,
@@ -312,42 +288,10 @@ static seobjif sectlif =
 static seobjif seconfif =
 {
 	.ctl       = NULL,
-	.use       = NULL,
+	.database  = NULL,
 	.open      = NULL,
 	.destroy   = NULL,
 	.set       = se_confset,
-	.get       = NULL,
-	.del       = NULL,
-	.begin     = NULL,
-	.commit    = NULL,
-	.rollback  = NULL,
-	.cursor    = NULL,
-	.fetch     = NULL,
-	.key       = NULL,
-	.keysize   = NULL,
-	.value     = NULL,
-	.valuesize = NULL,
-	.backup    = NULL
-};
-
-static int
-se_cmpset(seobj *o, va_list args)
-{
-	secmp *c = (secmp*)o;
-	char *name = va_arg(args, char*);
-	srcmpf cmp = va_arg(args, srcmpf);
-	void *cmparg = va_arg(args, void*);
-	return sr_cmpindex_add(&c->e->ci, &c->e->a,
-	                       SR_CMPCUSTOM, name, cmp, cmparg);
-}
-
-static seobjif secmpif =
-{
-	.ctl       = NULL,
-	.use       = NULL,
-	.open      = NULL,
-	.destroy   = NULL,
-	.set       = se_cmpset,
 	.get       = NULL,
 	.del       = NULL,
 	.begin     = NULL,

@@ -23,7 +23,7 @@ extern "C" {
 #endif
 
 SP_API void   *sp_env(void);
-SP_API void   *sp_use(void*, ...);
+SP_API void   *sp_database(void*, ...);
 SP_API void   *sp_ctl(void*, ...);
 SP_API int     sp_open(void*, ...);
 SP_API int     sp_destroy(void*, ...);
@@ -40,7 +40,6 @@ SP_API size_t  sp_keysize(void*, ...);
 SP_API void   *sp_value(void*, ...);
 SP_API size_t  sp_valuesize(void*, ...);
 SP_API void   *sp_backup(void*, ...);
-SP_API char   *sp_error(void *);
 
 #ifdef __cplusplus
 }

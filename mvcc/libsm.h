@@ -30,6 +30,5 @@ extern int sm_cmp(struct smtx*, uint32_t);
 #include <sm_indexiter.h>
 #include <sm.h>
 #include <sm_iter.h>
-#include <sm_db.h>
 
 #endif

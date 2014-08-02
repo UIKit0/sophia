@@ -204,7 +204,7 @@ int ss_merge(ssmerge *m)
 			break;
 		}
 		rc = ss_refcmp(page, svkey(key), svkeysize(key),
-		               m->c->sdb->cmp);
+		               &m->c->sdb->cmp);
 		switch (rc) {
 		case -1: /* [page] key */
 			ss_indexaccount(&m->result, page);

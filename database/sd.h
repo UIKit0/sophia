@@ -14,7 +14,6 @@
 typedef struct sd sd;
 
 struct sd {
-	uint32_t id;
 	srflags flags;
 	sdindex primary;
 	srbuf rbuf;

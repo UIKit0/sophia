@@ -43,7 +43,7 @@ ss_indexiter_seek(sriter *i, void *key, int size, int *minp, int *midp, int *max
 	{
 		mid = min + ((max - min) >> 1);
 		ssref *page = ss_indexpage(ii->index, mid);
-		int rc = ss_refcmp(page, key, size, i->c->sdb->cmp);
+		int rc = ss_refcmp(page, key, size, &i->c->sdb->cmp);
 		switch (rc) {
 		case -1: min = mid + 1;
 			continue;
@@ -158,7 +158,7 @@ ss_indexiter_open(sriter *i, va_list args)
 	switch (ii->order) {
 	case SR_LT: {
 		ssref *p = ss_indexpage(ii->index, ii->pos);
-		int l = sr_compare(i->c->sdb->cmp, ss_refmin(p), p->sizemin,
+		int l = sr_compare(&i->c->sdb->cmp, ss_refmin(p), p->sizemin,
 		                   ii->key, ii->keysize);
 		if (srunlikely(l == 0))
 			ii->pos--;
@@ -169,7 +169,7 @@ ss_indexiter_open(sriter *i, va_list args)
 		break;
 	case SR_GT: {
 		ssref *p = ss_indexpage(ii->index, ii->pos);
-		int r = sr_compare(i->c->sdb->cmp, ss_refmax(p), p->sizemax,
+		int r = sr_compare(&i->c->sdb->cmp, ss_refmax(p), p->sizemax,
 		                   ii->key, ii->keysize);
 		if (srunlikely(r == 0))
 			ii->pos++;

@@ -98,7 +98,7 @@ se_backupkeysize(seobj *o)
 static seobjif sebackupif =
 {
 	.ctl       = NULL,
-	.use       = NULL,
+	.database  = NULL,
 	.open      = NULL,
 	.destroy   = se_backupdestroy, 
 	.set       = NULL,

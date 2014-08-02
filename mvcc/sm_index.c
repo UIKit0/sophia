@@ -16,7 +16,7 @@ int sm_indexinit(smindex *i, src *c)
 	i->keymax = 0;
 	i->lsnmax = 0;
 	i->lsnmin = (uint64_t)-1;
-	int rc = sr_iinit(&i->index, c->a, 256, c->sdb->cmp);
+	int rc = sr_iinit(&i->index, c->a, 256, &c->sdb->cmp);
 	return rc;
 }
 

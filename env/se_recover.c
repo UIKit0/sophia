@@ -34,9 +34,9 @@ se_recovermetrics(se *e, uint32_t dsn, uint32_t psn,
 static char*
 se_recoversnapshotdb(se *e, sspagedb *db, char *ptr)
 {
-	seobj *odb = se_dbmatchid(e, db->dsn);
+	seobj *odb = se_dbmatch(e, db->dsn);
 	if (srunlikely(odb == NULL)) {
-		odb = se_dbprepare(e, db->dsn);
+		odb = se_dbnew(e, db->dsn);
 		if (srunlikely(odb == NULL))
 			return NULL;
 	}
@@ -130,10 +130,10 @@ se_recoverstoragedb(se *e, ssdb *db)
 		}
 
 		/* match database */
-		if (cdb == NULL || cdb->db.id != p->h->dsn) {
-			seobj *pdb = se_dbmatchid(e, p->h->dsn);
+		if (cdb == NULL || cdb->scheme.dsn != p->h->dsn) {
+			seobj *pdb = se_dbmatch(e, p->h->dsn);
 			if (srunlikely(pdb == NULL)) {
-				pdb = se_dbprepare(e, p->h->dsn);
+				pdb = se_dbnew(e, p->h->dsn);
 				if (srunlikely(pdb == NULL))
 					goto error;
 			}
@@ -220,88 +220,6 @@ se_recoverstorage(se *e)
 }
 
 static inline int
-se_recoverdb(sedb *db)
-{
-	int rc = sd_recover(&db->db, &db->track);
-	if (srunlikely(rc == -1))
-		return -1;
-	ss_trackfreeindex(&db->track);
-	return 0;
-}
-
-static inline int
-se_recoverscheme(se *e)
-{
-	/* recover scheme first */
-	sedb *scheme = ((sescheme*)(e->objscheme))->scheme;
-	int rc = se_recoverdb(scheme);
-	if (srunlikely(rc == -1))
-		return -1;
-
-	/* recreate database schemas */
-	sr_seq(&e->seq, SR_LSNNEXT);
-
-	void *sc = sp_cursor(scheme, ">", NULL, 0);
-	if (srunlikely(sc == NULL))
-		return -1;
-	while (sp_fetch(sc))
-	{
-		srscheme s;
-		int rc = sr_schemeinit_from(&s, &e->a, &e->ci,
-		                            sp_value(sc),
-		                            sp_valuesize(sc));
-		if (srunlikely(rc == -1)) {
-			sp_destroy(sc);
-			return -1;
-		}
-		sedb *db = (sedb*)se_dbmatchid(e, s.dsn);
-		if (srunlikely(db == NULL)) {
-			db = (sedb*)se_dbprepare(e, s.dsn);
-			if (srunlikely(db == NULL)) {
-				sr_schemefree(&s, &e->a);
-				sp_destroy(sc);
-				return -1;
-			}
-		}
-		se_dbdeploy(db, &s);
-	}
-	sp_destroy(sc);
-
-	e->seq.lsn--;
-
-	/* ensure all scheme are recovered */
-	srlist *i;
-	sr_listforeach(&e->oi.dblist, i) {
-		sedb *db = srcast(i, sedb, o.olink);
-		if (db->db.id == 0)
-			continue;
-		if (db->scheme.undef)
-			return -1;
-	}
-
-	return 0;
-}
-
-static inline int
-se_recoverbuild(se *e)
-{
-	srlist *i, *n;
-	sr_listforeach_safe(&e->oi.dblist, i, n) {
-		sedb *db = srcast(i, sedb, o.olink);
-		if (db->db.id == 0)
-			continue;
-		int rc;
-		if (srunlikely(sr_flagsisset(&db->db.flags, SD_FDROP)))
-			rc = se_dbdrop(db);
-		else
-			rc = se_recoverdb(db);
-		if (srunlikely(rc == -1))
-			return -1;
-	}
-	return 0;
-}
-
-static inline int
 se_recoverlog(se *e, sl *log)
 {
 	void *tx = NULL;
@@ -322,15 +240,10 @@ se_recoverlog(se *e, sl *log)
 
 		sedb *dbsrc;
 		void *db;
-		if (srunlikely(dsn == 0)) {
-			db = e->objscheme;
-			dbsrc = ((sescheme*)e->objscheme)->scheme;
-		} else {
-			db = se_dbmatchid(e, dsn);
-			if (srunlikely(db == NULL))
-				goto error;
-			dbsrc = db;
-		}
+		db = se_dbmatch(e, dsn);
+		if (srunlikely(db == NULL))
+			goto error;
+		dbsrc = db;
 
 		/* ensure that this update was not previously
 		 * merged to disk */
@@ -397,6 +310,34 @@ se_recoverlogpool(se *e)
 	return 0;
 }
 
+static inline int
+se_recoverdrop(se *e)
+{
+	srlist *i, *n;
+	sr_listforeach_safe(&e->oi.dblist, i, n) {
+		sedb *db = srcast(i, sedb, o.olink);
+		if (srlikely(! sr_flagsisset(&db->db.flags, SD_FDROP)))
+			continue;
+		int rc = se_dbdrop(db);
+		if (srunlikely(rc == -1))
+			return -1;
+	}
+	return 0;
+}
+
+static inline int
+se_recoverbuild(se *e)
+{
+	srlist *i, *n;
+	sr_listforeach_safe(&e->oi.dblist, i, n) {
+		sedb *db = srcast(i, sedb, o.olink);
+		int rc = db->o.oif->open(&db->o, NULL);
+		if (srunlikely(rc == -1))
+			return -1;
+	}
+	return 0;
+}
+
 int se_recover(se *e)
 {
 	/* iterate storage and each storage file in 
@@ -406,11 +347,25 @@ int se_recover(se *e)
 	int rc = se_recoverstorage(e);
 	if (srunlikely(rc == -1))
 		return -1;
-	/* recreate database schemas */
-	rc = se_recoverscheme(e);
+	/* schedule drop */
+	rc = se_recoverdrop(e);
 	if (srunlikely(rc == -1))
 		return -1;
-	/* recreate databases */
+
+	/* handle log on/off */
+
+	/*
+	 *  ON: do sp_open() on every db from dblist
+	 *  before log recover.
+	 *  if scheme is not set, then error.
+	 *  Proceed to log recover.
+	 *
+	 *  OFF: finish recover after storage recover.
+	*/
+	if (e->conf.logdir == NULL)
+		return 0;
+	/* finish database recover using default or
+	 * supplied schemas. */
 	rc = se_recoverbuild(e);
 	if (srunlikely(rc == -1))
 		return -1;

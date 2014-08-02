@@ -42,6 +42,34 @@ test_scheme_set_constraint_scheme(void)
 }
 
 static void
+test_scheme_set_constraint_scheme(void)
+{
+	rmrf("./test");
+	rmrf("./log");
+	void *env = sp_env();
+	t( env != NULL );
+	void *c = sp_use(env, "conf");
+	t( sp_set(c, "env.dir", "test") == 0 );
+	t( sp_set(c, "env.threads", 0) == 0 );
+	t( sp_set(c, "env.scheduler", 0) == 0 );
+	sp_destroy(c);
+	int rc = sp_open(env);
+	t( rc == 0 );
+
+	void *scheme = sp_use(env, "scheme");
+	t( scheme != NULL );
+
+	void *tx = sp_begin(scheme);
+	t( tx != NULL );
+	t( sp_set(tx, "scheme") == -1 ); /* alter denied */
+	t ( sp_commit(tx) == 0 );
+
+	sp_destroy(scheme);
+	t( sp_destroy(env) == 0 );
+}
+
+
+static void
 test_scheme_set_constraint_conf(void)
 {
 	rmrf("./test");

@@ -24,7 +24,7 @@ int sm_init(sm *m, src *c)
 	int rc = sr_tinit(&m->tx, c->a, 256, NULL);
 	if (srunlikely(rc == -1))
 		return -1;
-	rc = sr_iinit(&m->i, c->a, 256, c->sdb->cmp);
+	rc = sr_iinit(&m->i, c->a, 256, &c->sdb->cmp);
 	if (srunlikely(rc == -1)) {
 		sr_tfree(&m->tx);
 		return -1;

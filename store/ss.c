@@ -266,7 +266,6 @@ int ss_writeinit_callback(sswrite *w, sswritef cb, void *cbarg)
 
 int ss_write(ss *s, sswrite *w)
 {
-	assert(s->n > 0);
 	sr_spinlock(&s->lock);
 	ssdb *db = srcast(s->list.prev, ssdb, link);
 	ss_dbref(db);

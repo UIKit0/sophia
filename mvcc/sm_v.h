@@ -119,30 +119,6 @@ sm_vupdate(sra *a, smv *head, smv *n, uint64_t lsvn)
 	return n;
 }
 
-#if 0
-static inline smv*
-sm_vupdate(sra *a, smv *head, smv *n, uint64_t lsvn)
-{
-	assert(head->id.lsn < n->id.lsn);
-	assert(n->id.lsn >= lsvn);
-	if (srlikely(n->id.lsn == lsvn)) {
-		sm_vfree(a, head);
-		return n;
-	}
-	n->next = head;
-	register smv *c = head;
-	while (c && c->id.lsn > lsvn)
-		c = c->next;
-	if (c == NULL)
-		return n;
-	/* <= lsvn */
-	register smv *p = c->next;
-	c->next = NULL;
-	sm_vfree(a, p);
-	return n;
-}
-#endif
-
 static inline smv*
 sm_vmatch(smv *head, uint32_t id) {
 	register smv *c = head;

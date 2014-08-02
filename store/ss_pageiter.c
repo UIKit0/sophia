@@ -44,7 +44,7 @@ static inline int
 ss_pageiter_search(sriter *i, int search_min)
 {
 	sspageiter *pi = (sspageiter*)i->priv;
-	srcomparator *cmp = i->c->sdb->cmp;
+	srcomparator *cmp = &i->c->sdb->cmp;
 	int min = 0;
 	int mid = 0;
 	int max = pi->page->h->count - 1;
@@ -254,7 +254,7 @@ ss_pageiter_lt(sriter *i, int e)
 	ss_pageiter_lland(pi, pos);
 	if (pi->v == NULL)
 		return 0;
-	int rc = sr_compare(i->c->sdb->cmp, pi->v->key, pi->v->keysize,
+	int rc = sr_compare(&i->c->sdb->cmp, pi->v->key, pi->v->keysize,
 	                    pi->key, pi->keysize);
 	int match = rc == 0;
 	switch (rc) {
@@ -287,7 +287,7 @@ ss_pageiter_gt(sriter *i, int e)
 	ss_pageiter_gland(pi, pos);
 	if (pi->v == NULL)
 		return 0;
-	int rc = sr_compare(i->c->sdb->cmp, pi->v->key, pi->v->keysize,
+	int rc = sr_compare(&i->c->sdb->cmp, pi->v->key, pi->v->keysize,
 	                    pi->key, pi->keysize);
 	int match = rc == 0;
 	switch (rc) {

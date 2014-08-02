@@ -98,7 +98,7 @@ sd_pairlt(sdpairquery *q)
 
 	sv *v = a;
 	if (a && b) {
-		int rc = svcompare(a, b, q->c->sdb->cmp);
+		int rc = svcompare(a, b, &q->c->sdb->cmp);
 		switch (rc) {
 		case  1:
 		case  0: v = a;
@@ -132,7 +132,7 @@ sd_pairgt(sdpairquery *q)
 
 	sv *v = a;
 	if (a && b) {
-		int rc = svcompare(a, b, q->c->sdb->cmp);
+		int rc = svcompare(a, b, &q->c->sdb->cmp);
 		switch (rc) {
 		case -1:
 		case  0: v = a;

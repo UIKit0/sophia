@@ -5,12 +5,12 @@ CFLAGS  ?= -I. -I../env -I../store -I../log -I../mvcc -I../database -I../version
 LDFLAGS ?= -pthread ../env/libsophia.a
 
 all: clean \
-	common \
+	tx \
+	recover \
+#	common \
 	snapshot \
 	backup \
 	drop \
-	recover \
-	tx \
 	tx_merge \
 	seaveiter \
 	scheme \

@@ -2,9 +2,8 @@ LIBSE_O = se.o \
           se_db.o \
           se_tx.o \
           se_cursor.o \
-          se_scheme.o \
-          se_recover.o \
           se_backup.o \
+          se_recover.o \
           se_task.o \
           se_process.o \
           se_schedule.o \

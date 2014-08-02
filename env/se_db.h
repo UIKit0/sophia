@@ -11,8 +11,14 @@
 
 typedef struct sedbctl sedbctl;
 typedef struct sedb sedb;
+typedef struct sedbconf sedbconf;
 
 struct sedbctl {
+	seobj o;
+	sedb *parent;
+};
+
+struct sedbconf {
 	seobj o;
 	sedb *parent;
 };
@@ -23,19 +29,16 @@ struct sedb {
 	int ref;
 	srscheme scheme;
 	sstrack track;
-	smdb dbv;
 	sm mvcc;
 	sd db;
 	se *e;
 	src c;
-	sedbctl objctl;
+	sedbconf objconf;
+	sedbctl  objctl;
 };
 
-seobj *se_dbnew(se*, srscheme*);
-seobj *se_dbprepare(se*, uint32_t);
-seobj *se_dbdeploy(sedb*, srscheme*);
-seobj *se_dbmatch(se*, char*);
-seobj *se_dbmatchid(se*, uint32_t);
+seobj *se_dbnew(se*, uint32_t);
+seobj *se_dbmatch(se*, uint32_t);
 int    se_dbdrop(sedb*);
 void   se_dbref(sedb*);
 int    se_dbunref(sedb*);

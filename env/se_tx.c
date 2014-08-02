@@ -155,7 +155,7 @@ se_txcommit(seobj *o, va_list args)
 	/* log write */
 	sltx tl;
 	sl_begin(&e->lp, &tl);
-	int rc = sl_write(&tl, &t->t.log, db->db.id);
+	int rc = sl_write(&tl, &t->t.log, db->scheme.dsn);
 	if (srunlikely(rc == -1)) {
 		sl_rollback(&tl);
 		se_txrollback(&t->o);
@@ -256,7 +256,7 @@ int se_txssset(sedb *db, uint8_t flags, va_list args)
 	/* log write */
 	sltx tl;
 	sl_begin(&db->e->lp, &tl);
-	int rc = sl_write(&tl, &log, db->db.id);
+	int rc = sl_write(&tl, &log, db->scheme.dsn);
 	if (srunlikely(rc == -1)) {
 		sl_rollback(&tl);
 		sm_unlock(&db->mvcc);
@@ -431,7 +431,7 @@ se_txget(seobj *o, va_list args)
 static seobjif setxif =
 {
 	.ctl       = NULL,
-	.use       = NULL,
+	.database  = NULL,
 	.open      = NULL,
 	.destroy   = se_txrollback,
 	.set       = se_txset,

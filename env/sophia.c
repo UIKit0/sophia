@@ -23,15 +23,14 @@ sp_env(void)
 }
 
 SP_API void*
-sp_use(void *o, ...)
+sp_database(void *o, ...)
 {
 	seobjif *oif = ((seobj*)o)->oif;
-	if (srunlikely(oif->use == NULL))
+	if (srunlikely(oif->database == NULL))
 		return NULL;
 	va_list args;
 	va_start(args, o);
-	char *name = va_arg(args, char*);
-	void *h = oif->use(o, name);
+	void *h = oif->database(o, args);
 	va_end(args);
 	return h;
 }
@@ -42,7 +41,11 @@ sp_ctl(void *o, ...)
 	seobjif *oif = ((seobj*)o)->oif;
 	if (srunlikely(oif->ctl == NULL))
 		return NULL;
-	return oif->ctl(o);
+	va_list args;
+	va_start(args, o);
+	void *h = oif->ctl(o, args);
+	va_end(args);
+	return h;
 }
 
 SP_API int
@@ -219,11 +222,4 @@ sp_backup(void *o, ...)
 	if (srunlikely(oif->backup == NULL))
 		return NULL;
 	return oif->backup(o);
-}
-
-SP_API char*
-sp_error(void *ptr)
-{
-	(void)ptr;
-	return "";
 }

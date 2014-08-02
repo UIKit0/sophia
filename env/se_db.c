@@ -36,10 +36,15 @@ int se_dbunref(sedb *db)
 }
 
 static void*
-se_dbctl(seobj *o)
+se_dbctl(seobj *o, va_list args)
 {
 	sedb *db = (sedb*)o;
-	return &db->objctl;
+	char *name = va_arg(args, char*);
+	if (srlikely(strcmp(name, "ctl") == 0))
+		return &db->objctl;
+	if (srunlikely(strcmp(name, "conf") == 0))
+		return &db->objconf.o;
+	return NULL;
 }
 
 static int
@@ -65,7 +70,7 @@ se_dbdestroy(seobj *o)
 {
 	sedb *db = (sedb*)o;
 	if (se_active(db->e)) {
-		sm_dbindex_unuse(&db->e->dbvi, &db->dbv);
+		// XXX
 		return 0;
 	}
 	return se_dbfree(db);
@@ -75,6 +80,8 @@ static int
 se_dbset(seobj *o, va_list args)
 {
 	sedb *db = (sedb*)o;
+	if (srunlikely(! db->scheme.ready))
+		return -1;
 	return se_txssset(db, SVSET, args);
 }
 
@@ -82,6 +89,8 @@ static int
 se_dbdelete(seobj *o, va_list args)
 {
 	sedb *db = (sedb*)o;
+	if (srunlikely(! db->scheme.ready))
+		return -1;
 	return se_txssset(db, SVDELETE, args);
 }
 
@@ -89,6 +98,8 @@ static int
 se_dbget(seobj *o, va_list args)
 {
 	sedb *db = (sedb*)o;
+	if (srunlikely(! db->scheme.ready))
+		return -1;
 	return se_txssget(db, args);
 }
 
@@ -96,6 +107,8 @@ static void*
 se_dbbegin(seobj *o)
 {
 	sedb *db = (sedb*)o;
+	if (srunlikely(! db->scheme.ready))
+		return NULL;
 	return se_txnew(db, NULL, NULL);
 }
 
@@ -103,14 +116,18 @@ static void*
 se_dbcursor(seobj *o, int order, void *key, int keysize)
 {
 	sedb *db = (sedb*)o;
+	if (srunlikely(! db->scheme.ready))
+		return NULL;
 	return se_cursornew(db, order, key, keysize);
 }
+
+static int se_dbopen(seobj*, va_list);
 
 static seobjif sedbif =
 {
 	.ctl       = se_dbctl,
-	.use       = NULL,
-	.open      = NULL,
+	.database  = NULL,
+	.open      = se_dbopen,
 	.destroy   = se_dbdestroy,
 	.set       = se_dbset,
 	.del       = se_dbdelete,
@@ -128,128 +145,114 @@ static seobjif sedbif =
 };
 
 static seobjif sedbctlif;
+static seobjif sedbconfif;
 
-seobj *se_dbnew(se *e, srscheme *s)
-{
-	sedb *db = sr_malloc(&e->a, sizeof(sedb));
-	if (srunlikely(db == NULL))
-		return NULL;
-	se_objinit(&db->o, SEODB, &sedbif);
-	sr_spinlockinit(&db->lock);
-	db->ref    = 0;
-	db->e      = e;
-	db->scheme = *s;
-	db->c      = e->c;
-	db->c.sdb  = &db->scheme;
-	ss_trackinit(&db->track, &db->c);
-	int rc = sm_init(&db->mvcc, &db->c);
-	if (srunlikely(rc == -1)) {
-		sr_schemefree(&db->scheme, &e->a);
-		sr_free(&e->a, db);
-		return NULL;
-	}
-	rc = sd_new(&db->db, &db->scheme, &e->store, &db->c);
-	if (srunlikely(rc == -1)) {
-		sm_free(&db->mvcc);
-		sr_schemefree(&db->scheme, &e->a);
-		sr_free(&e->a, db);
-		return NULL;
-	}
-	rc = sd_prepare(&db->db);
-	if (srunlikely(rc == -1)) {
-		sd_free(&db->db);
-		sm_free(&db->mvcc);
-		sr_schemefree(&db->scheme, &e->a);
-		sr_free(&e->a, db);
-		return NULL;
-	}
-	sm_dbinit(&db->dbv, &db->scheme, db);
-	sm_dbindex_add(&e->dbvi, &db->dbv);
-
-	se_objinit(&db->objctl.o, SEODBCTL, &sedbctlif);
-	db->objctl.parent = db;
-
-	se_dbref(db);
-	se_objindex_register(&e->oi, &db->o);
-	return &db->o;
-}
-
-seobj *se_dbprepare(se *e, uint32_t dsn)
-{
-	srscheme s;
-	int rc = sr_schemeinit_undef(&s, &e->a, &e->ci);
-	if (srunlikely(rc == -1))
-		return NULL;
-	s.dsn = dsn;
-	sedb *db = sr_malloc(&e->a, sizeof(sedb));
-	if (srunlikely(db == NULL))
-		return NULL;
-	se_objinit(&db->o, SEODB, &sedbif);
-	sr_spinlockinit(&db->lock);
-	db->ref    = 0;
-	db->e      = e;
-	db->scheme = s;
-	db->c      = e->c;
-	db->c.sdb  = &db->scheme;
-	ss_trackinit(&db->track, &db->c);
-	rc = sm_init(&db->mvcc, &db->c);
-	if (srunlikely(rc == -1)) {
-		sr_schemefree(&db->scheme, &e->a);
-		sr_free(&e->a, db);
-		return NULL;
-	}
-	rc = sd_new(&db->db, &db->scheme, &e->store, &db->c);
-	if (srunlikely(rc == -1)) {
-		sm_free(&db->mvcc);
-		sr_schemefree(&db->scheme, &e->a);
-		sr_free(&e->a, db);
-		return NULL;
-	}
-	rc = ss_trackprepare(&db->track, 512);
-	if (srunlikely(rc == -1)) {
-		se_dbdestroy(&db->o);
-		return NULL;
-	}
-
-	se_objinit(&db->objctl.o, SEODBCTL, &sedbctlif);
-	db->objctl.parent = db;
-
-	se_dbref(db);
-	se_objindex_register(&e->oi, &db->o);
-	return &db->o;
-}
-
-seobj *se_dbdeploy(sedb *db, srscheme *s)
-{
-	sr_schemefree(&db->scheme, &db->e->a);
-	db->scheme = *s;
-	sm_dbinit(&db->dbv, &db->scheme, db);
-	sm_dbindex_add(&db->e->dbvi, &db->dbv);
-	return &db->o;
-}
-
-seobj *se_dbmatch(se *e, char *name)
+static sedb*
+se_dbmatch_parent(se *e, sedb *own, uint32_t dsn)
 {
 	se_objindex_lock(&e->oi);
 	srlist *i;
 	sr_listforeach(&e->oi.dblist, i) {
 		sedb *db = srcast(i, sedb, o.olink);
-		if (strcmp(db->db.scheme->name, name) == 0) {
+		if (db == own)
+			continue;
+		if (db->scheme.recover == 0)
+			continue;
+		if (db->scheme.dsn == dsn) {
 			se_objindex_unlock(&e->oi);
-			return &db->o;
+			return db;
 		}
 	}
 	se_objindex_unlock(&e->oi);
 	return NULL;
 }
 
-seobj *se_dbmatchid(se *e, uint32_t dsn)
+static int
+se_dbopen(seobj *o, va_list args)
+{
+	(void)args;
+	sedb *db = (sedb*)o;
+	se *e = db->e;
+	if (db->scheme.ready)
+		return -1;
+	sedb *prev = se_dbmatch_parent(e, db, db->scheme.dsn);
+	int rc;
+	if (prev == NULL) {
+		/* new db */
+		rc = sd_prepare(&db->db);
+		if (srunlikely(rc == -1))
+			return -1;
+	} else {
+		/* complete database recover using
+		 * scheme */
+		if (prev->scheme.ready)
+			return -1;
+		rc = sd_recover(&db->db, &prev->track);
+		if (srunlikely(rc == -1)) {
+			sd_free(&db->db);
+			return -1;
+		}
+		ss_trackfreeindex(&prev->track);
+		prev->scheme.dsn = UINT32_MAX;
+		se_dbunref(prev);
+	}
+	rc = sm_init(&db->mvcc, &db->c);
+	if (srunlikely(rc == -1)) {
+		sd_free(&db->db);
+		return -1;
+	}
+	db->scheme.ready = 1;
+	return 0;
+}
+
+seobj *se_dbnew(se *e, uint32_t dsn)
+{
+	sedb *db = sr_malloc(&e->a, sizeof(sedb));
+	if (srunlikely(db == NULL))
+		return NULL;
+	memset(db, 0, sizeof(sedb));
+	se_objinit(&db->o, SEODB, &sedbif);
+	sr_spinlockinit(&db->lock);
+	db->ref    = 0;
+	db->e      = e;
+	int rc = sr_schemeinit(&db->scheme, &e->a);
+	if (srunlikely(rc == -1)) {
+		sr_free(&e->a, db);
+		return NULL;
+	}
+	db->scheme.dsn = dsn;
+	if (e->mode == SE_RECOVER)
+		db->scheme.recover = 1;
+	db->c      = e->c;
+	db->c.sdb  = &db->scheme;
+	rc = sd_new(&db->db, &db->scheme, &e->store, &db->c);
+	if (srunlikely(rc == -1)) {
+		sr_schemefree(&db->scheme, &e->a);
+		sr_free(&e->a, db);
+		return NULL;
+	}
+	ss_trackinit(&db->track, &db->c);
+	rc = ss_trackprepare(&db->track, 512);
+	if (srunlikely(rc == -1)) {
+		se_dbdestroy(&db->o);
+		return NULL;
+	}
+	se_objinit(&db->objctl.o, SEODBCTL, &sedbctlif);
+	db->objctl.parent = db;
+	se_objinit(&db->objconf.o, SEODBCONF, &sedbconfif);
+	db->objconf.parent = db;
+	se_dbref(db);
+	se_objindex_register(&e->oi, &db->o);
+	return &db->o;
+}
+
+seobj *se_dbmatch(se *e, uint32_t dsn)
 {
 	se_objindex_lock(&e->oi);
 	srlist *i;
 	sr_listforeach(&e->oi.dblist, i) {
 		sedb *db = srcast(i, sedb, o.olink);
-		if (db->db.id == dsn) {
+		if (db->scheme.dsn == dsn) {
 			se_objindex_unlock(&e->oi);
 			return &db->o;
 		}
@@ -260,7 +263,6 @@ seobj *se_dbmatchid(se *e, uint32_t dsn)
 
 int se_dbdrop(sedb *db)
 {
-	sm_dbindex_remove(&db->e->dbvi, &db->dbv);
 	se_dbunref(db);
 	return 0;
 }
@@ -293,10 +295,47 @@ se_dbctlset(seobj *o, va_list args)
 static seobjif sedbctlif =
 {
 	.ctl       = NULL,
-	.use       = NULL,
+	.database  = NULL,
 	.open      = NULL,
 	.destroy   = NULL,
 	.set       = se_dbctlset,
+	.get       = NULL,
+	.del       = NULL,
+	.begin     = NULL,
+	.commit    = NULL,
+	.rollback  = NULL,
+	.cursor    = NULL,
+	.fetch     = NULL,
+	.key       = NULL,
+	.keysize   = NULL,
+	.value     = NULL,
+	.valuesize = NULL,
+	.backup    = NULL
+};
+
+static int
+se_dbconfset(seobj *o, va_list args)
+{
+	sedbconf *c = (sedbconf*)o;
+	if (srunlikely(c->parent->scheme.ready))
+		return -1;
+	srschemeparser sp;
+	char *name = sr_schemeprepare(&sp, args);
+	if (srunlikely(name == NULL))
+		return -1;
+	int rc = sr_schemeset(&sp, &c->parent->scheme);
+	if (srunlikely(rc == -1))
+		return -1;
+	return 0;
+}
+
+static seobjif sedbconfif =
+{
+	.ctl       = NULL,
+	.database  = NULL,
+	.open      = NULL,
+	.destroy   = NULL,
+	.set       = se_dbconfset,
 	.get       = NULL,
 	.del       = NULL,
 	.begin     = NULL,

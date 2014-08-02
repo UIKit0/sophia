@@ -10,9 +10,9 @@
 */
 
 #include <se_obj.h>
+#include <se_process.h>
 #include <se_cmd.h>
 #include <se_task.h>
-#include <se_process.h>
 #include <se.h>
 #include <se_db.h>
 #include <se_tx.h>

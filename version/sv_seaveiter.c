@@ -95,7 +95,7 @@ sv_seaveiter_next(sriter *i)
 			}
 		} else {
 			if (im->boundon) {
-				int rc = sr_compare(i->c->sdb->cmp, svkey(v), svkeysize(v),
+				int rc = sr_compare(&i->c->sdb->cmp, svkey(v), svkeysize(v),
 				                    im->bound, im->boundsize);
 				if (srunlikely(rc >= 0))
 					im->boundreached = 1;

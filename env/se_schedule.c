@@ -167,8 +167,11 @@ se_schedule_db(seplan *p, sedb *db, ssdblist *gcl, int snapshot)
 
 	int unmerged = 0;
 	int drop = 0;
-	if ((p->plan & SE_DROP) && !snapshot)
-		drop = sm_dbindex_garbage(&e->dbvi, &db->dbv);
+	if ((p->plan & SE_DROP) && !snapshot) {
+		/*drop = sm_dbindex_garbage(&e->dbvi, &db->dbv);*/
+		// XXX refof db == 0
+		drop = 0;
+	}
 
 	int i;
 	if ((p->plan & SE_MERGE) ||
@@ -246,9 +249,11 @@ int se_schedule(seplan *p)
 	se *e = p->e;
 	int rc = 0;
 	if (p->plan & SE_ROTATELOG) {
-		rc = se_schedule_rotatelog(p);
-		if (srunlikely(rc == -1))
-			return -1;
+		if (e->conf.logdir) {
+			rc = se_schedule_rotatelog(p);
+			if (srunlikely(rc == -1))
+				return -1;
+		}
 	}
 	if (p->plan & SE_ROTATEDB) {
 		rc = se_schedule_rotatedb(p);

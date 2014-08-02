@@ -99,7 +99,7 @@ sv_mergeiter_next(sriter *i)
 	if (a && b) {
 		assert(a->v != NULL);
 		assert(b->v != NULL);
-		int rc = svcompare(a, b, i->c->sdb->cmp);
+		int rc = svcompare(a, b, &i->c->sdb->cmp);
 		switch (rc) {
 		case  0:
 			/*

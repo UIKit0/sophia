@@ -164,7 +164,7 @@ int sd_splitrange(sdsplit *s, smindex *i)
 	if (srunlikely(i->index.n == 0))
 		return 0;
 
-	srcomparator *cmp = s->c->sdb->cmp;
+	srcomparator *cmp = &s->c->sdb->cmp;
 	sriter j;
 	sr_iterinit(&j, &sm_indexiterraw, s->c);
 	sr_iteropen(&j, i);
