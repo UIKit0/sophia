@@ -67,5 +67,5 @@ ss_trackcmp(const void *a, const void *b, void *c)
 
 void ss_tracksort(sstrack *t)
 {
-	qsort_r(t->i, t->size, sizeof(ssref*), ss_trackcmp, t);
+	sr_qsort(t->i, t->size, sizeof(ssref*), ss_trackcmp, t);
 }

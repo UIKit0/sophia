@@ -1,6 +1,7 @@
 LIBSR_O = sr_crc.o \
           sr_cmp.o \
           sr_bufiter.o \
+          sr_qsort.o \
           sr_thread.o \
           sr_conf.o \
           sr_scheme.o \

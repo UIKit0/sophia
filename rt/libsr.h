@@ -43,6 +43,7 @@
 #include <sr_cmp.h>
 #include <sr_conf.h>
 #include <sr_buf.h>
+#include <sr_qsort.h>
 #include <sr_scheme.h>
 #include <sr_c.h>
 #include <sr_iter.h>
