@@ -54,18 +54,16 @@ void ss_trackcompact(sstrack *t)
 static inline int
 ss_trackcmp(const void *a, const void *b, void *c)
 {
-	register ssref *ap = *(ssref**)a;
-	register ssref *bp = *(ssref**)b;
-	register sstrack *t = c;
-	register int rc =
-		sr_compare(&t->c->sdb->cmp,
-		           ss_refmin(ap), ap->sizemin,
-		           ss_refmin(bp), bp->sizemin);
+	ssref *ap = *(ssref**)a;
+	ssref *bp = *(ssref**)b;
+	srcomparator *cmp = c;
+	int rc = sr_compare(cmp, ss_refmin(ap), ap->sizemin,
+	                    ss_refmin(bp), bp->sizemin);
 	assert(rc != 0);
 	return rc;
 }
 
-void ss_tracksort(sstrack *t)
+void ss_tracksort(sstrack *t, srcomparator *cmp)
 {
-	sr_qsort(t->i, t->size, sizeof(ssref*), ss_trackcmp, t);
+	sr_qsort(t->i, t->size, sizeof(ssref*), ss_trackcmp, cmp);
 }

@@ -47,7 +47,7 @@ int sd_recover(sd *db, sstrack *s)
 {
 	/* cleanup drop pages and compact index */
 	ss_trackgc(s);
-	ss_tracksort(s);
+	ss_tracksort(s, &db->c->sdb->cmp);
 
 	sdnode *node = sr_malloc(db->c->a, sizeof(sdnode));
 	if (srunlikely(node == NULL))

@@ -133,7 +133,7 @@ ss_trackhas(sstrack *t, uint32_t id)
 	return 0;
 }
 
+void ss_tracksort(sstrack*, srcomparator*);
 void ss_trackgc(sstrack*);
-void ss_tracksort(sstrack*);
 
 #endif
