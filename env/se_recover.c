@@ -362,8 +362,10 @@ int se_recover(se *e)
 	 *
 	 *  OFF: finish recover after storage recover.
 	*/
-	if (e->conf.logdir == NULL)
+	if (e->conf.logdir == NULL) {
+		sr_seq(&e->seq, SR_LSNNEXT);
 		return 0;
+	}
 	/* finish database recover using default or
 	 * supplied schemas. */
 	rc = se_recoverbuild(e);

@@ -59,6 +59,15 @@ int sd_recover(sd *db, sstrack *s)
 		return -1;
 	}
 	ss_indexinit(&node->index, s->keymax);
+	if (srunlikely(s->size == 0)) {
+		rc = sd_nodeindex_append(&db->primary.i, db->c->a, node);
+		if (srunlikely(rc == -1)) {
+			sd_nodefree(node);
+			sr_free(db->c->a, node);
+			return -1;
+		}
+		return 0;
+	}
 
 	int fill = db->c->c->node_size / 2;
 	int i = 0;
@@ -80,6 +89,7 @@ int sd_recover(sd *db, sstrack *s)
 				return -1;
 			}
 			ss_indexinit(&node->index, s->keymax);
+			n = 0;
 		}
 		rc = ss_indexadd(&node->index, db->c->a, s->i[i]);
 		if (srunlikely(rc == -1)) {
@@ -91,7 +101,7 @@ int sd_recover(sd *db, sstrack *s)
 		n++;
 		i++;
 	}
-	if (n == 0 || n % fill) {
+	if (n > 0) {
 		rc = sd_nodeindex_append(&db->primary.i, db->c->a, node);
 		if (srunlikely(rc == -1)) {
 			sd_nodefree(node);

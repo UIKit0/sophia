@@ -1316,9 +1316,256 @@ test_recover_drop_empty(void)
 }
 #endif
 
+static void
+test_recover_logless0(void)
+{
+	rmrf("./test");
+	rmrf("./log");
+
+	void *env = sp_env();
+	t( env != NULL );
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.dir", "test") == 0 );
+	t( sp_set(c, "env.threads", 0) == 0 );
+	t( sp_set(c, "env.scheduler", 0) == 0 );
+	sp_destroy(c);
+	int rc = sp_open(env);
+	t( rc == 0 );
+
+	void *test = sp_database(env);
+	t( test != NULL );
+	c = sp_ctl(test, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_set(c, "db.id", 64) == 0 );
+	t( sp_open(test) == 0 );
+
+	int i = 0;
+	while (i < 10000) {
+		t( sp_set(test, &i, sizeof(i), &i, sizeof(i)) == 0 );
+		i++;
+	}
+	t( sp_set(sp_ctl(test, "ctl"), "merge") == 0 );
+	t( sp_destroy(env) == 0 );
+
+	env = sp_env();
+	t( env != NULL );
+	c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.dir", "test") == 0 );
+	t( sp_set(c, "env.threads", 0) == 0 );
+	t( sp_set(c, "env.scheduler", 0) == 0 );
+	rc = sp_open(env);
+	t( rc == 0 );
+
+	test = sp_database(env);
+	t( test != NULL );
+	c = sp_ctl(test, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_set(c, "db.id", 64) == 0 );
+	t( sp_open(test) == 0 );
+
+	i = 0;
+	while (i < 10000) {
+		void *value = NULL;
+		int valuesize = 0;
+		t( sp_get(test, &i, sizeof(i), &value, &valuesize) == 1 );
+		free(value);
+		i++;
+	}
+
+	t( sp_destroy(env) == 0 );
+}
+
+static void
+test_recover_logless1(void)
+{
+	rmrf("./test");
+	rmrf("./log");
+
+	void *env = sp_env();
+	t( env != NULL );
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.dir", "test") == 0 );
+	t( sp_set(c, "env.threads", 0) == 0 );
+	t( sp_set(c, "env.scheduler", 0) == 0 );
+	sp_destroy(c);
+	int rc = sp_open(env);
+	t( rc == 0 );
+	void *test = sp_database(env);
+	t( test != NULL );
+	c = sp_ctl(test, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_set(c, "db.id", 64) == 0 );
+	t( sp_open(test) == 0 );
+	int i = 0;
+	while (i < 10000) {
+		t( sp_set(test, &i, sizeof(i), &i, sizeof(i)) == 0 );
+		i++;
+	}
+	t( sp_set(sp_ctl(test, "ctl"), "merge") == 0 );
+	t( sp_destroy(env) == 0 );
+
+	env = sp_env();
+	t( env != NULL );
+	c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.dir", "test") == 0 );
+	t( sp_set(c, "env.threads", 0) == 0 );
+	t( sp_set(c, "env.scheduler", 0) == 0 );
+	rc = sp_open(env);
+	t( rc == 0 );
+
+	test = sp_database(env);
+	t( test != NULL );
+	c = sp_ctl(test, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_set(c, "db.id", 64) == 0 );
+	t( sp_open(test) == 0 );
+
+	i = 0;
+	while (i < 10000) {
+		t( sp_set(test, &i, sizeof(i), &i, sizeof(i)) == 0 );
+		i++;
+	}
+	t( sp_set(sp_ctl(test, "ctl"), "merge") == 0 );
+	t( sp_destroy(env) == 0 );
+
+	env = sp_env();
+	t( env != NULL );
+	c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.dir", "test") == 0 );
+	t( sp_set(c, "env.threads", 0) == 0 );
+	t( sp_set(c, "env.scheduler", 0) == 0 );
+	rc = sp_open(env);
+	t( rc == 0 );
+
+	test = sp_database(env);
+	t( test != NULL );
+	c = sp_ctl(test, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_set(c, "db.id", 64) == 0 );
+	t( sp_open(test) == 0 );
+
+	i = 0;
+	while (i < 10000) {
+		void *value = NULL;
+		int valuesize = 0;
+		t( sp_get(test, &i, sizeof(i), &value, &valuesize) == 1 );
+		free(value);
+		i++;
+	}
+
+	t( sp_destroy(env) == 0 );
+}
+
+static void
+test_recover_logless2(void)
+{
+	rmrf("./test");
+	rmrf("./log");
+
+	void *env = sp_env();
+	t( env != NULL );
+	void *c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.dir", "test") == 0 );
+	t( sp_set(c, "env.threads", 0) == 0 );
+	t( sp_set(c, "env.scheduler", 0) == 0 );
+	sp_destroy(c);
+	int rc = sp_open(env);
+	t( rc == 0 );
+	void *test = sp_database(env);
+	t( test != NULL );
+	c = sp_ctl(test, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_set(c, "db.id", 64) == 0 );
+	t( sp_open(test) == 0 );
+	int i = 0;
+	while (i < 10000) {
+		t( sp_set(test, &i, sizeof(i), &i, sizeof(i)) == 0 );
+		i++;
+	}
+	t( sp_set(sp_ctl(test, "ctl"), "merge") == 0 );
+	t( sp_destroy(env) == 0 );
+
+	env = sp_env();
+	t( env != NULL );
+	c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.dir", "test") == 0 );
+	t( sp_set(c, "env.threads", 0) == 0 );
+	t( sp_set(c, "env.scheduler", 0) == 0 );
+	rc = sp_open(env);
+	t( rc == 0 );
+
+	test = sp_database(env);
+	t( test != NULL );
+	c = sp_ctl(test, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_set(c, "db.id", 64) == 0 );
+	t( sp_open(test) == 0 );
+
+	i = 0;
+	while (i < 10000) {
+		t( sp_set(test, &i, sizeof(i), &i, sizeof(i)) == 0 );
+		i++;
+	}
+	t( sp_set(sp_ctl(test, "ctl"), "merge") == 0 );
+	t( sp_destroy(env) == 0 );
+
+	env = sp_env();
+	t( env != NULL );
+	c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.dir", "test") == 0 );
+	t( sp_set(c, "env.threads", 0) == 0 );
+	t( sp_set(c, "env.scheduler", 0) == 0 );
+	rc = sp_open(env);
+	t( rc == 0 );
+
+	test = sp_database(env);
+	t( test != NULL );
+	c = sp_ctl(test, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_set(c, "db.id", 64) == 0 );
+	t( sp_open(test) == 0 );
+
+	i = 0;
+	while (i < 10000) {
+		t( sp_set(test, &i, sizeof(i), &i, sizeof(i)) == 0 );
+		i++;
+	}
+	t( sp_set(sp_ctl(test, "ctl"), "merge") == 0 );
+	t( sp_destroy(env) == 0 );
+
+	env = sp_env();
+	t( env != NULL );
+	c = sp_ctl(env, "conf");
+	t( sp_set(c, "env.dir", "test") == 0 );
+	t( sp_set(c, "env.threads", 0) == 0 );
+	t( sp_set(c, "env.scheduler", 0) == 0 );
+	rc = sp_open(env);
+	t( rc == 0 );
+
+	test = sp_database(env);
+	t( test != NULL );
+	c = sp_ctl(test, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_set(c, "db.id", 64) == 0 );
+	t( sp_open(test) == 0 );
+
+	i = 0;
+	while (i < 10000) {
+		void *value = NULL;
+		int valuesize = 0;
+		t( sp_get(test, &i, sizeof(i), &value, &valuesize) == 1 );
+		free(value);
+		i++;
+	}
+
+	t( sp_destroy(env) == 0 );
+}
+
+
 int
 main(int argc, char *argv[])
 {
+
 	test( test_recover_log_empty );
 	test( test_recover_log_set_get );
 	test( test_recover_log_set_get_n );
@@ -1341,5 +1588,9 @@ main(int argc, char *argv[])
 	test( test_recover_merge_log_fetch_gte );
 	test( test_recover_drop_empty );
 #endif
+
+	test( test_recover_logless0 );
+	test( test_recover_logless1 );
+	test( test_recover_logless2 );
 	return 0;
 }

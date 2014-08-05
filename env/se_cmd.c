@@ -22,7 +22,7 @@ se_gc(se *e)
 	if (srunlikely(se_objindex_count(&e->oi, SEOBACKUP) > 0))
 		return 0;
 	int rc;
-	if (srlikely(e->conf.log_gc)) {
+	if (srlikely(e->conf.logdir && e->conf.log_gc )) {
 		rc = sl_poolgc(&e->lp);
 		if (srunlikely(rc == -1))
 			return -1;
