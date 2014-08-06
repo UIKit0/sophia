@@ -31,7 +31,12 @@ CFLAGS_DEBUG    = -g
 CFLAGS_OPT      = -O0
 CFLAGS_STRICT   = -std=c99 -pedantic -Wextra -Wall 
 CFLAGS_MISC     = -march=native -fPIC -fvisibility=hidden
-CFLAGS         ?= $(CFLAGS_INCLUDE) $(CFLAGS_OPT) $(CFLAGS_DEBUG) $(CFLAGS_STRICT) $(CFLAGS_MISC)
-LDFLAGS        ?= -shared -soname $(SOPHIA_DSO).$(SOPHIA_VMAJOR)
+CFLAGS_SOPHIA   = $(CFLAGS_INCLUDE) \
+                  $(CFLAGS_OPT) \
+                  $(CFLAGS_DEBUG) \
+                  $(CFLAGS_STRICT) \
+                  $(CFLAGS_MISC) \
+                  $(CFLAGS)
+LDFLAGS_SOPHIA  = $(LDFLAGS) -shared -soname $(SOPHIA_DSO).$(SOPHIA_VMAJOR)
 
 # vim: syntax=make
