@@ -86,9 +86,7 @@ se_cmddrop(setask *t, se *e)
 	int rc = sd_drop(&db->db, &p->sc);
 	if (srunlikely(rc == -1))
 		return -1;
-	rc = se_dbdrop(db);
-	if (srunlikely(rc == -1))
-		return -1;
+	se_dbunref(db);
 	return se_gc(e);
 }
 

@@ -11,6 +11,7 @@
 #include <sys/time.h>
 #include <string.h>
 
+#include <libsr.h>
 #include <sophia.h>
 #include "test.h"
 
@@ -21,7 +22,7 @@ test_drop_schedule(void)
 	rmrf("./log");
 	void *env = sp_env();
 	t( env != NULL );
-	void *c = sp_use(env, "conf");
+	void *c = sp_ctl(env, "conf");
 	t( sp_set(c, "env.dir", "test") == 0 );
 	t( sp_set(c, "env.threads", 0) == 0 );
 	t( sp_set(c, "env.scheduler", 0) == 0 );
@@ -29,16 +30,13 @@ test_drop_schedule(void)
 	int rc = sp_open(env);
 	t( rc == 0 );
 
-	void *scheme = sp_use(env, "scheme");
-	t( scheme != NULL );
-
-	void *tx = sp_begin(scheme);
-	t( tx != NULL );
-	t( sp_set(tx, "test") == 0 );
-	t ( sp_commit(tx) == 0 );
-
-	void *test = sp_use(env, "test");
+	void *test = sp_database(env);
 	t( test != NULL );
+	c = sp_ctl(test, "conf");
+	t( sp_set(c, "db.cmp", sr_cmpu32, NULL) == 0 );
+	t( sp_set(c, "db.id", 64) == 0 );
+	t( sp_open(test) == 0 );
+
 	int key = 7;
 	t( sp_set(test, &key, sizeof(key), &key, sizeof(key)) == 0 );
 	key = 8;
@@ -47,20 +45,13 @@ test_drop_schedule(void)
 	t( sp_set(test, &key, sizeof(key), &key, sizeof(key)) == 0 );
 	sp_destroy(test);
 
-	tx = sp_begin(scheme);
-	t( tx != NULL );
-	t( sp_delete(tx, "test") == 0 );
-	t( sp_commit(tx) == 0 );
+	t( sp_drop(test) == 0 );
 
 	/* mark for drop/merge, do merge */
-	t( sp_set(sp_ctl(env), "schedule") == 0 );
+	t( sp_set(sp_ctl(env, "ctl"), "schedule") == 0 );
 	/* actual drop */
-	t( sp_set(sp_ctl(env), "schedule") == 0 );
+	t( sp_set(sp_ctl(env, "ctl"), "schedule") == 0 );
 
-	test = sp_use(env, "test");
-	t( test == NULL );
-
-	sp_destroy(scheme);
 	t( sp_destroy(env) == 0 );
 }
 

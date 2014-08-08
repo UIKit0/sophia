@@ -318,9 +318,7 @@ se_recoverdrop(se *e)
 		sedb *db = srcast(i, sedb, o.olink);
 		if (srlikely(! sr_flagsisset(&db->db.flags, SD_FDROP)))
 			continue;
-		int rc = se_dbdrop(db);
-		if (srunlikely(rc == -1))
-			return -1;
+		se_dbunref(db);
 	}
 	return 0;
 }

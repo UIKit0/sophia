@@ -70,6 +70,17 @@ sp_destroy(void *o, ...)
 	return oif->destroy(o);
 }
 
+SP_API int sp_drop(void *o, ...)
+{
+	seobjif *oif = ((seobj*)o)->oif;
+	if (srunlikely(oif->drop == NULL))
+		return -1;
+	va_list args;
+	int rc = oif->drop(o, args);
+	va_end(args);
+	return rc;
+}
+
 SP_API int
 sp_set(void *o, ...)
 {

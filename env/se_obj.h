@@ -36,6 +36,7 @@ struct seobjif {
 	int     (*destroy)(seobj*);
 	void   *(*database)(seobj*, va_list);
 	void   *(*ctl)(seobj*, va_list);
+	int     (*drop)(seobj*, va_list);
 	int     (*set)(seobj*, va_list);
 	int     (*get)(seobj*, va_list);
 	int     (*del)(seobj*, va_list);

@@ -35,6 +35,21 @@ int se_dbunref(sedb *db)
 	return se_dbfree(db);
 }
 
+int se_dbdropis(sedb *db)
+{
+	sr_spinlock(&db->lock);
+	int v = db->drop;
+	sr_spinunlock(&db->lock);
+	return v;
+}
+
+void se_dbdropset(sedb *db)
+{
+	sr_spinlock(&db->lock);
+	db->drop = 1;
+	sr_spinunlock(&db->lock);
+}
+
 static void*
 se_dbctl(seobj *o, va_list args)
 {
@@ -122,6 +137,7 @@ se_dbcursor(seobj *o, int order, void *key, int keysize)
 }
 
 static int se_dbopen(seobj*, va_list);
+static int se_dbdrop(seobj*, va_list);
 
 static seobjif sedbif =
 {
@@ -129,6 +145,7 @@ static seobjif sedbif =
 	.database  = NULL,
 	.open      = se_dbopen,
 	.destroy   = se_dbdestroy,
+	.drop      = se_dbdrop,
 	.set       = se_dbset,
 	.del       = se_dbdelete,
 	.get       = se_dbget,
@@ -261,9 +278,12 @@ seobj *se_dbmatch(se *e, uint32_t dsn)
 	return NULL;
 }
 
-int se_dbdrop(sedb *db)
+static int
+se_dbdrop(seobj *o, va_list args)
 {
-	se_dbunref(db);
+	(void)args;
+	sedb *db = (sedb*)o;
+	se_dbdropset(db);
 	return 0;
 }
 

@@ -27,6 +27,7 @@ struct sedb {
 	seobj o;
 	srspinlock lock;
 	int ref;
+	int drop;
 	srscheme scheme;
 	sstrack track;
 	sm mvcc;
@@ -39,8 +40,8 @@ struct sedb {
 
 seobj *se_dbnew(se*, uint32_t);
 seobj *se_dbmatch(se*, uint32_t);
-int    se_dbdrop(sedb*);
 void   se_dbref(sedb*);
 int    se_dbunref(sedb*);
+int    se_dbdropis(sedb*);
 
 #endif

@@ -175,6 +175,7 @@ static seobjif secursorif =
 	.database  = NULL,
 	.open      = NULL,
 	.destroy   = se_cursordestroy, 
+	.drop      = NULL,
 	.set       = NULL,
 	.get       = NULL,
 	.del       = NULL,

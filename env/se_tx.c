@@ -498,6 +498,7 @@ static seobjif setxif =
 	.database  = NULL,
 	.open      = NULL,
 	.destroy   = se_txrollback,
+	.drop      = NULL,
 	.set       = se_txset,
 	.del       = se_txdelete,
 	.get       = se_txget,

@@ -171,11 +171,8 @@ se_schedule_db(seplan *p, sedb *db, ssdblist *gcl, int snapshot)
 
 	int unmerged = 0;
 	int drop = 0;
-	if ((p->plan & SE_DROP) && !snapshot) {
-		/*drop = sm_dbindex_garbage(&e->dbvi, &db->dbv);*/
-		// XXX refof db == 0
-		drop = 0;
-	}
+	if ((p->plan & SE_DROP) && !snapshot)
+		drop = se_dbdropis(db);
 
 	int i;
 	if ((p->plan & SE_MERGE) ||

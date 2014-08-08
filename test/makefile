@@ -7,10 +7,10 @@ LDFLAGS ?= -pthread ../env/libsophia.a
 all: clean \
 	tx \
 	recover \
+	drop \
 #	common \
 	snapshot \
 	backup \
-	drop \
 	tx_merge \
 	seaveiter \
 	scheme \

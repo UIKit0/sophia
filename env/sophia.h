@@ -27,6 +27,7 @@ SP_API void   *sp_database(void*, ...);
 SP_API void   *sp_ctl(void*, ...);
 SP_API int     sp_open(void*, ...);
 SP_API int     sp_destroy(void*, ...);
+SP_API int     sp_drop(void*, ...);
 SP_API int     sp_set(void*, ...);
 SP_API int     sp_get(void*, ...);
 SP_API int     sp_delete(void*, ...);
