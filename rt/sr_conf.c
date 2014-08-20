@@ -22,6 +22,7 @@ int sr_confinit(srconf *c, sra *a)
 	c->dir_read       = 1;
 	c->dir_write      = 1;
 	c->dir_create     = 1;
+	c->create_on_write = 0;
 	c->node_merge_wm  = 512;
 	c->node_size      = 10;
 	c->page_size      = 1024;
@@ -106,6 +107,9 @@ int sr_confset(srconf *c, sra *a, char *path, va_list args)
 	} else
 	if (strcmp(token, "logdir_create") == 0) {
 		c->logdir_create = va_arg(args, int);
+	} else
+	if (strcmp(token, "create_on_write") == 0) {
+		c->create_on_write = va_arg(args, int);
 	} else
 	if (strcmp(token, "page_size") == 0) {
 		int page_size = va_arg(args, int);

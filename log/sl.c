@@ -84,6 +84,7 @@ int sl_poolinit(slpool *p, src *c)
 	sr_listinit(&p->list);
 	p->n = 0;
 	p->c = c;
+	p->create = 0;
 	struct iovec *iov =
 		sr_malloc(c->a, sizeof(struct iovec) * 1021);
 	if (srunlikely(iov == NULL))
@@ -93,14 +94,17 @@ int sl_poolinit(slpool *p, src *c)
 }
 
 static inline int
-sl_poolcreate(slpool *p)
+sl_poolcreate(slpool *p, int open)
 {
 	srconf *c = p->c->c;
 	int rc;
+	p->create = 1;
 	if (! c->logdir_create)
 		return -1;
 	if (! c->logdir_write)
 		return -1;
+	if (open && c->create_on_write)
+		return 0;
 	rc = sr_filemkdir(c->logdir);
 	if (srunlikely(rc == -1))
 		return -1;
@@ -148,7 +152,7 @@ int sl_poolopen(slpool *p)
 	int exists = sr_fileexists(p->c->c->logdir);
 	int rc;
 	if (! exists)
-		rc = sl_poolcreate(p);
+		rc = sl_poolcreate(p, 1);
 	else
 		rc = sl_poolrecover(p);
 	if (srunlikely(rc == -1))
@@ -297,10 +301,24 @@ int sl_rollback(sltx *t)
 	return rc;
 }
 
+static inline int
+sl_create_on_write(slpool *p)
+{
+	if (srunlikely(p->create && p->c->c->create_on_write))
+	{
+		p->create = 0;
+		return sl_poolcreate(p, 0);
+	}
+	return 0;
+}
+
 int sl_write(sltx *t, svlog *vlog, uint32_t dsn)
 {
 	slpool *p = t->p;
 	sl *l = t->l;
+	int rc = sl_create_on_write(p);
+	if (srunlikely(rc == -1))
+		return -1;
 
 	uint64_t lsn = sr_seq(p->c->seq, SR_LSNNEXT);
 

@@ -15,6 +15,7 @@ typedef struct sswrite sswrite;
 typedef int (*sswritef)(sswrite*);
 
 struct ss {
+	int create;
 	srmutex lockw;
 	srspinlock lock;
 	srlist list;
@@ -59,10 +60,10 @@ int ss_listref(ss*, sra*, srbuf*);
 int ss_read(ss*, src*, srbuf*, sspage*, ssref*, ssdb**);
 int ss_writeinit_callback(sswrite*, sswritef, void*);
 int ss_writeinit(sswrite*, int, ssindex*, sspagebuild*, srbuf*, int);
-int ss_write(ss*, sswrite*);
+int ss_write(ss*, src*, sswrite*);
 int ss_written(ss*);
 
 int ss_dropindex(ss*, ssindex*);
-int ss_drop(ss*, sspagebuild*, uint32_t);
+int ss_drop(ss*, src*, sspagebuild*, uint32_t);
 
 #endif

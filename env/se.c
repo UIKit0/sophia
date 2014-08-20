@@ -388,7 +388,7 @@ int se_snapshot(se *e, ssc *sc)
 	sswrite w;
 	ss_writeinit(&w, 1, NULL, &sc->build, NULL, 0);
 	w.lock = 0;
-	rc = ss_write(&e->store, &w);
+	rc = ss_write(&e->store, &e->c, &w);
 
 	se_listunref(e, &list);
 	ss_unlock(&e->store);

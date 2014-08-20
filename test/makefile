@@ -8,6 +8,7 @@ all: clean \
 	tx \
 	recover \
 	drop \
+	create_on_write \
 #	common \
 	snapshot \
 	backup \
@@ -26,6 +27,8 @@ all: clean \
 	smindex \
 	smindexiter
 
+create_on_write: create_on_write.o
+	$(CC) create_on_write.o $(LDFLAGS) -o create_on_write
 ssmerge: ssmerge.o
 	$(CC) ssmerge.o $(LDFLAGS) -o ssmerge
 sliter: sliter.o
@@ -89,6 +92,7 @@ clean:
 	$(RM) -f pageiter.o pageiter
 	$(RM) -f smindex.o smindex
 	$(RM) -f smindexiter.o smindexiter
+	$(RM) -f create_on_write.o create_on_write
 #$(RM) -rf log test
 test:
 	$(VALGRIND) ./ssmerge
@@ -110,3 +114,4 @@ test:
 	$(VALGRIND) ./pageiter
 	$(VALGRIND) ./smindex
 	$(VALGRIND) ./smindexiter
+	$(VALGRIND) ./create_on_write

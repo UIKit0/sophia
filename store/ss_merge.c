@@ -240,7 +240,7 @@ int ss_mergewrite(ssmerge *m, sswritef cb, void *cbarg)
 	sswrite w;
 	ss_writeinit(&w, 1, &m->result, m->b, NULL, 0);
 	ss_writeinit_callback(&w, cb, cbarg);
-	int rc = ss_write(m->s, &w);
+	int rc = ss_write(m->s, m->c, &w);
 	if (srunlikely(rc == -1))
 		return -1;
 	ss_mergesweep(m);

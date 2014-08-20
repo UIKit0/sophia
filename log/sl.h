@@ -32,6 +32,7 @@ struct sl {
 };
 
 struct slpool {
+	int create;
 	srspinlock lock;
 	sriov iov;
 	srlist list;

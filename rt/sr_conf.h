@@ -22,6 +22,7 @@ struct srconf {
 	int dir_read;
 	int dir_write;
 	int dir_create;
+	int create_on_write;
 
 	int node_merge_wm;
 	int node_merge_force_round;

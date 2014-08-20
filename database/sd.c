@@ -115,7 +115,7 @@ int sd_recover(sd *db, sstrack *s)
 int sd_drop(sd *db, ssc *sc)
 {
 	ss_creset(sc);
-	int rc = ss_drop(db->store, &sc->build, db->scheme->dsn);
+	int rc = ss_drop(db->store, db->c, &sc->build, db->scheme->dsn);
 	if (srunlikely(rc == -1))
 		return -1;
 	sd_indexdrop(&db->primary, db->store);

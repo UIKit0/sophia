@@ -26,17 +26,21 @@ int ss_init(ss *s)
 	sr_listinit(&s->list);
 	s->n = 0;
 	s->nwrite = 0;
+	s->create = 0;
 	return 0;
 }
 
 static inline int
-ss_create(ss *s, src *c)
+ss_create(ss *s, src *c, int open)
 {
 	int rc;
+	s->create = 1;
 	if (! c->c->dir_create)
 		return -1;
 	if (! c->c->dir_write)
 		return -1;
+	if (open && c->c->create_on_write)
+		return 0;
 	rc = sr_filemkdir(c->c->dir);
 	if (srunlikely(rc == -1))
 		return -1;
@@ -85,7 +89,7 @@ int ss_open(ss *s, src *c)
 {
 	int exists = sr_fileexists(c->c->dir);
 	if (! exists)
-		return ss_create(s, c);
+		return ss_create(s, c, 1);
 	return ss_recover(s, c);
 }
 
@@ -264,8 +268,23 @@ int ss_writeinit_callback(sswrite *w, sswritef cb, void *cbarg)
 	return 0;
 }
 
-int ss_write(ss *s, sswrite *w)
+static inline int
+ss_create_on_write(ss *s, src *c)
 {
+	if (srunlikely(s->create && c->c->create_on_write))
+	{
+		s->create = 0;
+		return ss_create(s, c, 0);
+	}
+	return 0;
+}
+
+int ss_write(ss *s, src *c, sswrite *w)
+{
+	int rc = ss_create_on_write(s, c);
+	if (srunlikely(rc == -1))
+		return -1;
+
 	sr_spinlock(&s->lock);
 	ssdb *db = srcast(s->list.prev, ssdb, link);
 	ss_dbref(db);
@@ -274,7 +293,6 @@ int ss_write(ss *s, sswrite *w)
 	if (srlikely(w->lock))
 		ss_lock(s);
 	int count;
-	int rc;
 	w->dfsn = db->id;
 	if (w->b) {
 		/* write pagebuild */
@@ -340,12 +358,12 @@ int ss_dropindex(ss *s, ssindex *index)
 	return 0;
 }
 
-int ss_drop(ss *s, sspagebuild *b, uint32_t dsn)
+int ss_drop(ss *s, src *c, sspagebuild *b, uint32_t dsn)
 {
 	int rc = ss_pagebuild_drop(b, dsn);
 	if (srunlikely(rc == -1))
 		return -1;
 	sswrite w;
 	ss_writeinit(&w, 1, NULL, b, NULL, 0);
-	return ss_write(s, &w);
+	return ss_write(s, c, &w);
 }

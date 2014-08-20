@@ -67,7 +67,7 @@ int ss_copywrite(sscopy *c, sswritef cb, void *cbarg)
 	sswrite w;
 	ss_writeinit(&w, 1, NULL, NULL, c->rwbuf, count);
 	ss_writeinit_callback(&w, cb, cbarg);
-	int rc = ss_write(c->s, &w);
+	int rc = ss_write(c->s, c->c, &w);
 	if (srunlikely(rc == -1))
 		return -1;
 	return 0;
