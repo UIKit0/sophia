@@ -58,6 +58,7 @@ const (
 	SPMNONE spmagic = 0
 )
 
+// type of an error
 const (
 	SPENONE = 0
 	SPE     = 1
@@ -67,6 +68,7 @@ const (
 	SPEF    = 16
 )
 
+// error
 type spe struct {
 	lock sync.Mutex
 	//spspinlock lock
