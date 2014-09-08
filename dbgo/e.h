@@ -1,30 +1,6 @@
 #ifndef SP_E_H_
 #define SP_E_H_
 
-/*
- * sophia database
- * sphia.org
- *
- * Copyright (c) Dmitry Simonenko
- * BSD License
-*/
-
-typedef struct spe spe;
-
-#define SPENONE 0
-#define SPE     1
-#define SPEOOM  2
-#define SPESYS  4
-#define SPEIO   8
-#define SPEF    16
-
-struct spe {
-	spspinlock lock;
-	int type;
-	int errno_;
-	char e[256];
-};
-
 static inline void
 sp_einit(spe *e) {
 	e->type = SPENONE;

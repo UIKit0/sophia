@@ -12,35 +12,11 @@
 #define SP_VERSION_MAJOR 1
 #define SP_VERSION_MINOR 1
 
-typedef struct sp sp;
-typedef struct spenv spenv;
-
-typedef enum spmagic spmagic;
-
 enum sptxn {
 	SPTSS, SPTMS
 };
 
 typedef enum sptxn sptxn;
-
-struct spenv {
-	spmagic m;
-	spe e;
-	int inuse;
-	spallocf alloc;
-	void *allocarg;
-	spcmpf cmp;
-	void *cmparg;
-	uint32_t flags;
-	char *dir;
-	int merge;
-	uint32_t mergewm;
-	uint32_t page;
-	uint32_t dbnewsize;
-	float dbgrow;
-	int gc;
-	float gcfactor;
-};
 
 struct sp {
 	spmagic m;
