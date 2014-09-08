@@ -111,13 +111,5 @@ sp_em(sp *s, int type, ...) {
 	return -1;
 }
 
-static inline int
-sp_ee(spenv *e, int type, ...) {
-	va_list args;
-	va_start(args, type);
-	sp_vef(&e->e, type, args);
-	va_end(args);
-	return -1;
-}
 
 #endif
