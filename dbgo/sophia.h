@@ -4,16 +4,7 @@
 typedef void *(*spallocf)(void *ptr, size_t size, void *arg);
 typedef int (*spcmpf)(char *a, size_t asz, char *b, size_t bsz, void *arg);
 
-typedef struct {
-	uint32_t epoch;
-	uint64_t psn;
-	uint32_t repn;
-	uint32_t repndb;
-	uint32_t repnxfer;
-	uint32_t catn;
-	uint32_t indexn;
-	uint32_t indexpages;
-} spstat;
+
 
 SP_API void *sp_env(void);
 SP_API void *sp_open(void *env);

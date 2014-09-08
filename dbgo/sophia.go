@@ -35,3 +35,14 @@ const (
 	SPLT
 	SPLTE
 )
+
+type spstat struct {
+	epoch      uint32
+	psn        uint64
+	repn       uint32
+	repndb     uint32
+	repnxfer   uint32
+	catn       uint32
+	index      uint32
+	indexpages uint32
+}
