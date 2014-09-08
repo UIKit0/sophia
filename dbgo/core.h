@@ -15,13 +15,6 @@
 typedef struct sp sp;
 typedef struct spenv spenv;
 
-enum spmagic {
-	SPMCUR  = 0x15481936L,
-	SPMENV  = 0x06154834L,
-	SPMDB   = 0x00fec0feL,
-	SPMNONE = 0L
-};
-
 typedef enum spmagic spmagic;
 
 enum sptxn {

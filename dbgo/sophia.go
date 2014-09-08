@@ -46,3 +46,12 @@ type spstat struct {
 	index      uint32
 	indexpages uint32
 }
+
+type spmagic uint32
+
+const (
+	SPMCUR  spmagic = 0x15481936
+	SPMENV  spmagic = 0x06154834
+	SPMDB   spmagic = 0x00fec0fe
+	SPMNONE spmagic = 0
+)

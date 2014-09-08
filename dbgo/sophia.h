@@ -25,8 +25,5 @@ SP_API size_t sp_valuesize(void *cur);
 SP_API char *sp_error(void *ptr);
 SP_API void sp_stat(void *ptr, spstat*);
 
-#ifdef __cplusplus
-}
-#endif
 
 #endif
