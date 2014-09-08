@@ -1,10 +1,6 @@
-#ifndef SOPHIA_H_
-#define SOPHIA_H_
 
 typedef void *(*spallocf)(void *ptr, size_t size, void *arg);
 typedef int (*spcmpf)(char *a, size_t asz, char *b, size_t bsz, void *arg);
-
-
 
 SP_API void *sp_env(void);
 SP_API void *sp_open(void *env);
@@ -24,6 +20,3 @@ SP_API const char *sp_value(void *cur);
 SP_API size_t sp_valuesize(void *cur);
 SP_API char *sp_error(void *ptr);
 SP_API void sp_stat(void *ptr, spstat*);
-
-
-#endif

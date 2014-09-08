@@ -1,15 +1,6 @@
 #ifndef SP_CAT_H_
 #define SP_CAT_H_
 
-/*
- * sophia database
- * sphia.org
- *
- * Copyright (c) Dmitry Simonenko
- * BSD License
-*/
-
-typedef struct spcat spcat;
 
 struct spcat {
 	spa *a;

@@ -1,5 +1,35 @@
 package main
 
+func sp_einit(e *spe) {
+	e.typ = SPENONE
+	//e.e[0] = 0
+	//sp_lockinit(&e->lock);
+}
+
+func sp_envinit(e *spenv) {
+	e.m = SPMENV
+	e.inuse = 0
+	sp_einit(&e.e)
+	//e.alloc = sp_allocstd
+	//e.allocarg = NULL
+	//e.cmp = cmpstd
+	//e.cmparg = nil
+	e.page = 2048
+	e.flags = 0
+	e.mergewm = 100000
+	e.merge = 1
+	e.dbnewsize = 2 * 1024 * 1024
+	e.dbgrow = 1.4
+	e.gc = 1
+	e.gcfactor = 0.5
+}
+
+func sp_env() *spenv {
+	e := &spenv{}
+	sp_envinit(e)
+	return e
+}
+
 /*
 #include <sp.h>
 
@@ -10,25 +40,6 @@ cmpstd(char *a, size_t asz, char *b, size_t bsz, void *arg spunused) {
 	if (rc == 0)
 		return (asz == bsz) ? 0 : (asz > bsz ? 1 : -1);
 	return rc > 0 ? 1 : -1;
-}
-
-static inline void sp_envinit(spenv *e) {
-	e->m = SPMENV;
-	e->inuse = 0;
-	sp_einit(&e->e);
-	e->alloc = sp_allocstd;
-	e->allocarg = NULL;
-	e->cmp = cmpstd;
-	e->cmparg = NULL;
-	e->page = 2048;
-	e->dir = NULL;
-	e->flags = 0;
-	e->mergewm = 100000;
-	e->merge = 1;
-	e->dbnewsize = 2 * 1024 * 1024;
-	e->dbgrow = 1.4;
-	e->gc = 1;
-	e->gcfactor = 0.5;
 }
 
 static inline void sp_envfree(spenv *e) {
@@ -57,14 +68,6 @@ static inline int sp_envvalidate(spenv *e)
 	if ((e->page % 2) > 0)
 		return sp_ee(e, SPE, "bad page size must be even");
 	return 0;
-}
-
-void *sp_env(void) {
-	spenv *e = malloc(sizeof(spenv));
-	if (spunlikely(e == NULL))
-		return NULL;
-	sp_envinit(e);
-	return e;
 }
 
 static int sp_ctlenv(spenv *e, spopt opt, va_list args)

@@ -2,13 +2,6 @@
 #define SP_E_H_
 
 static inline void
-sp_einit(spe *e) {
-	e->type = SPENONE;
-	e->e[0] = 0;
-	sp_lockinit(&e->lock);
-}
-
-static inline void
 sp_efree(spe *e) {
 	sp_lockfree(&e->lock);
 }

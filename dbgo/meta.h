@@ -1,13 +1,3 @@
-#ifndef SP_META_H_
-#define SP_META_H_
-
-/*
- * sophia database
- * sphia.org
- *
- * Copyright (c) Dmitry Simonenko
- * BSD License
-*/
 
 /* on-disk */
 
@@ -83,5 +73,3 @@ sp_vvsize(spv *v) {
 	register char *p = (char*)(v->key + v->size);
 	return *(uint32_t*)p;
 }
-
-#endif
