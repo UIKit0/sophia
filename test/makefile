@@ -1,7 +1,9 @@
 CC      ?= gcc
 RM       = rm
-CFLAGS   = -I. -I../db -Wall -pthread -O0 -g
-LDFLAGS  = -pthread ../db/libsophia.a
+CFLAGS   = -I. -I../db -Wall -O0 -g
+#  -pthread
+LDFLAGS  =  ../db/libsophia.a
+# -pthread
 all: i common recover merge concurrent transaction crash limit issues
 common: common.o
 	$(CC) common.o $(LDFLAGS) -o common

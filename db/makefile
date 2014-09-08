@@ -12,10 +12,15 @@ VERMINOR        = 1
 TARGET_STATIC   = libsophia.a
 TARGET_DSOLIB   = libsophia.so.$(VERMAJOR).$(VERMINOR)
 TARGET_DSO      = libsophia.so
-TARGET_CFLAGS   = -I. -pthread -std=c99 -pedantic -Wextra -Wall -fPIC -fvisibility=hidden -O2 -DNDEBUG
-TARGET_LDFLAGS  = -shared -soname $(TARGET_DSO).$(VERMAJOR)
+TARGET_CFLAGS   = -I. -std=c99 -pedantic -Wextra -Wall -fPIC -fvisibility=hidden -O2 -DNDEBUG
+#  -pthread
+TARGET_LDFLAGS  = -dylib -lc
 CFLAGS         := $(TARGET_CFLAGS) $(CFLAGS) -fno-stack-protector
-LDFLAGS        := $(TARGET_LDFLAGS) -shared -soname $(TARGET_DSO).$(VERMAJOR) $(LDFLAGS)
+LDFLAGS        := $(TARGET_LDFLAGS) -dylib  $(LDFLAGS)
+
+# -soname $(TARGET_DSO).$(VERMAJOR)
+# -soname $(TARGET_DSO).$(VERMAJOR)
+# is -install_name
 
 OBJS = file.o \
 	crc.o \
@@ -39,7 +44,7 @@ $(TARGET_DSO): $(OBJS)
 	$(LD) $(OBJS) $(LDFLAGS) -o $(TARGET_DSOLIB)
 	$(LN) -s $(TARGET_DSOLIB) $(TARGET_DSO).$(VERMAJOR)
 	$(LN) -s $(TARGET_DSOLIB) $(TARGET_DSO)
-	$(STRIP) --strip-unneeded $(TARGET_DSO)
+	#$(STRIP) --strip-unneeded $(TARGET_DSO)
 
 .c.o:
 	$(CC) $(CFLAGS) -c $<
